@@ -10,7 +10,6 @@ import { BookingMonitorComponent } from './features/bookings/booking-monitor.com
 import { PaymentReconcilerComponent } from './features/payments/payment-reconciler.component';
 import { ReviewModeratorComponent } from './features/reviews/review-moderator.component';
 import { AnalyticsComponent } from './features/analytics/analytics.component';
-import { PromoListComponent } from './features/promos/promo-list.component';
 import { SettingsComponent } from './features/settings/settings.component';
 
 export const routes: Routes = [
@@ -29,7 +28,6 @@ export const routes: Routes = [
       { path: 'payments', component: PaymentReconcilerComponent },
       { path: 'reviews', component: ReviewModeratorComponent },
       { path: 'analytics', component: AnalyticsComponent },
-      { path: 'promos', component: PromoListComponent },
       { path: 'settings', component: SettingsComponent }
     ]
   },

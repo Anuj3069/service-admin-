@@ -24,26 +24,6 @@ export class AdminService {
     return this.http.patch<any>(`${this.apiUrl}/admin/settings`, data);
   }
 
-  // ── PROMO CODES ─────────────────────────────────────────────
-  getPromos(filters: any = {}): Observable<any> {
-    let params = new HttpParams();
-    if (filters.page) params = params.set('page', filters.page.toString());
-    if (filters.limit) params = params.set('limit', filters.limit.toString());
-    return this.http.get<any>(`${this.apiUrl}/admin/promos`, { params });
-  }
-
-  createPromo(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/admin/promos`, data);
-  }
-
-  updatePromo(id: string, data: any): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/admin/promos/${id}`, data);
-  }
-
-  deletePromo(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/admin/promos/${id}`);
-  }
-
   // ── ANALYTICS ───────────────────────────────────────────────
   getRevenueTrends(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/admin/analytics/revenue-trends`);

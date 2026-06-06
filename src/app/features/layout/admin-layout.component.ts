@@ -40,9 +40,6 @@ import { Router, RouterModule } from '@angular/router';
           <a routerLink="reviews" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
             <span class="nav-icon">💬</span> Reviews
           </a>
-          <a routerLink="promos" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-            <span class="nav-icon">🎟️</span> Promo Codes
-          </a>
           <a routerLink="settings" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
             <span class="nav-icon">⚙️</span> Settings
           </a>
