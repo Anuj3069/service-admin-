@@ -9,6 +9,9 @@ import { CatalogComponent } from './features/catalog/catalog.component';
 import { BookingMonitorComponent } from './features/bookings/booking-monitor.component';
 import { PaymentReconcilerComponent } from './features/payments/payment-reconciler.component';
 import { ReviewModeratorComponent } from './features/reviews/review-moderator.component';
+import { AnalyticsComponent } from './features/analytics/analytics.component';
+import { PromoListComponent } from './features/promos/promo-list.component';
+import { SettingsComponent } from './features/settings/settings.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -24,7 +27,10 @@ export const routes: Routes = [
       { path: 'catalog', component: CatalogComponent },
       { path: 'bookings', component: BookingMonitorComponent },
       { path: 'payments', component: PaymentReconcilerComponent },
-      { path: 'reviews', component: ReviewModeratorComponent }
+      { path: 'reviews', component: ReviewModeratorComponent },
+      { path: 'analytics', component: AnalyticsComponent },
+      { path: 'promos', component: PromoListComponent },
+      { path: 'settings', component: SettingsComponent }
     ]
   },
   { path: '', redirectTo: 'admin/dashboard', pathMatch: 'full' },

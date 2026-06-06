@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { forkJoin } from 'rxjs';
 import { AdminService } from '../../core/services/admin.service';
 
 @Component({
@@ -44,7 +43,7 @@ import { AdminService } from '../../core/services/admin.service';
           <div class="stat-icon earnings-icon">💰</div>
           <div class="stat-content">
             <span class="stat-label">Total Paid Revenue</span>
-            <h3 class="stat-value">₹{{ totalEarnings.toLocaleString() }}</h3>
+            <h3 class="stat-value">₹{{ totalPaidRevenue.toLocaleString() }}</h3>
           </div>
         </div>
       </div>
@@ -272,7 +271,7 @@ export class DashboardComponent {
   totalUsers = 0;
   totalProviders = 0;
   activeBookings = 0;
-  totalEarnings = 0;
+  totalPaidRevenue = 0;
 
   countRequested = 0;
   countAccepted = 0;
@@ -291,67 +290,28 @@ export class DashboardComponent {
   }
 
   loadDashboardData() {
-    forkJoin({
-      users: this.adminService.getUsers({ limit: 1 }),
-      providers: this.adminService.getProviders({ limit: 1 }),
-      bookings: this.adminService.getBookings({ limit: 100 }),
-      payments: this.adminService.getPayments({ limit: 100 })
-    }).subscribe({
+    this.adminService.getDashboardStats().subscribe({
       next: (res) => {
-        // Stats calculations
-        this.totalUsers = res.users.data?.total || 0;
-        this.totalProviders = res.providers.data?.total || 0;
+        const stats = res.data;
 
-        const bookingsList = res.bookings.data?.items || [];
-        const paymentsList = res.payments.data?.items || [];
+        // All values are pre-computed by the backend
+        this.totalUsers = stats.totalUsers || 0;
+        this.totalProviders = stats.totalProviders || 0;
+        this.activeBookings = stats.activeBookings || 0;
+        this.totalPaidRevenue = stats.totalPaidRevenue || 0;
 
-        // Active bookings: status requested, accepted, pending
-        this.activeBookings = bookingsList.filter((b: any) => 
-          ['requested', 'pending', 'accepted'].includes(b.status)
-        ).length;
-
-        // Total earnings: sum of all paid orders
-        this.totalEarnings = paymentsList
-          .filter((p: any) => p.status === 'paid')
-          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
-
-        // Chart distributions
-        this.countRequested = bookingsList.filter((b: any) => b.status === 'requested').length;
-        this.countAccepted = bookingsList.filter((b: any) => ['pending', 'accepted'].includes(b.status)).length;
-        this.countCompleted = bookingsList.filter((b: any) => b.status === 'completed').length;
+        this.countRequested = stats.countRequested || 0;
+        this.countAccepted = stats.countAccepted || 0;
+        this.countCompleted = stats.countCompleted || 0;
 
         this.calculateRingChart();
 
-        // System activity feed construction
-        const activities: Array<{ text: string, time: Date, type: string }> = [];
-
-        // Add bookings to activity feed
-        bookingsList.slice(0, 5).forEach((b: any) => {
-          activities.push({
-            text: `Booking ${b._id.substring(18)} was set to '${b.status}' for ${b.userId?.name || 'Customer'}`,
-            time: new Date(b.createdAt),
-            type: 'booking'
-          });
-        });
-
-        // Add payments to activity feed
-        paymentsList.slice(0, 5).forEach((p: any) => {
-          activities.push({
-            text: `Payment order for ₹${p.amount} set to status '${p.status}'`,
-            time: new Date(p.createdAt),
-            type: 'payment'
-          });
-        });
-
-        // Sort activities by time descending
-        this.recentActivities = activities
-          .sort((a, b) => b.time.getTime() - a.time.getTime())
-          .slice(0, 6)
-          .map(act => ({
-            text: act.text,
-            time: this.formatRelativeTime(act.time),
-            type: act.type
-          }));
+        // Activity feed — only format relative times on the UI side
+        this.recentActivities = (stats.recentActivities || []).map((act: any) => ({
+          text: act.text,
+          time: this.formatRelativeTime(new Date(act.time)),
+          type: act.type
+        }));
       },
       error: (err) => {
         console.error('Error fetching dashboard stats:', err);
