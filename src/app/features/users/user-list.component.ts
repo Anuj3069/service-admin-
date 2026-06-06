@@ -25,14 +25,14 @@ import { AdminService } from '../../core/services/admin.service';
             (ngModelChange)="onSearch()"
           />
           
-          <select class="form-control filter-select" [(ngModel)]="selectedRole" (change)="loadUsers()">
+          <select class="form-control filter-select" [(ngModel)]="selectedRole" (change)="onFilterChange()">
             <option value="">All Roles</option>
             <option value="customer">Customer</option>
             <option value="worker">Worker</option>
             <option value="admin">Administrator</option>
           </select>
 
-          <select class="form-control filter-select" [(ngModel)]="selectedStatus" (change)="loadUsers()">
+          <select class="form-control filter-select" [(ngModel)]="selectedStatus" (change)="onFilterChange()">
             <option value="">All Statuses</option>
             <option value="true">Active Only</option>
             <option value="false">Blocked Only</option>
@@ -96,10 +96,29 @@ import { AdminService } from '../../core/services/admin.service';
         </div>
 
         <!-- Pagination -->
-        <div class="table-pagination" *ngIf="totalPages > 1">
-          <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="btn btn-secondary btn-small">Previous</button>
-          <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
-          <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" class="btn btn-secondary btn-small">Next</button>
+        <div class="table-pagination">
+          <div class="pagination-summary">
+            Showing {{ pageStart }}-{{ pageEnd }} of {{ totalUsers }} users
+          </div>
+          <div class="pagination-controls">
+            <select class="form-control page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option [ngValue]="10">10 / page</option>
+              <option [ngValue]="25">25 / page</option>
+              <option [ngValue]="50">50 / page</option>
+            </select>
+            <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="btn btn-secondary btn-small">Prev</button>
+            <div class="page-numbers">
+              <button
+                *ngFor="let page of visiblePages"
+                class="btn btn-secondary btn-small page-btn"
+                [class.active]="page === currentPage"
+                (click)="changePage(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+            <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" class="btn btn-secondary btn-small">Next</button>
+          </div>
         </div>
       </div>
 
@@ -140,7 +159,7 @@ import { AdminService } from '../../core/services/admin.service';
     .page-header h1 {
       font-size: 2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .page-header p {
       color: var(--text-muted);
@@ -176,7 +195,7 @@ import { AdminService } from '../../core/services/admin.service';
       height: 28px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.05);
-      color: #fff;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -186,7 +205,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .user-name {
       font-weight: 500;
-      color: #fff;
+      color: var(--text-main);
     }
     .contact-details {
       display: flex;
@@ -202,16 +221,9 @@ import { AdminService } from '../../core/services/admin.service';
       color: var(--text-muted);
     }
     .table-pagination {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 12px 4px 12px;
       border-top: 1px solid var(--border);
       margin-top: 12px;
-    }
-    .page-indicator {
-      font-size: 0.875rem;
-      color: var(--text-muted);
+      padding: 16px 4px 4px;
     }
     .modal-prompt {
       font-size: 0.95rem;
@@ -273,6 +285,16 @@ export class UserListComponent {
     this.loadUsers();
   }
 
+  onFilterChange() {
+    this.currentPage = 1;
+    this.loadUsers();
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.loadUsers();
+  }
+
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
@@ -296,6 +318,23 @@ export class UserListComponent {
     if (role === 'admin') return 'badge-primary';
     if (role === 'worker') return 'badge-accent';
     return 'badge-success';
+  }
+
+  get visiblePages(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, Math.min(this.currentPage - 2, this.totalPages - 4));
+    const end = Math.min(this.totalPages, start + 4);
+    for (let page = start; page <= end; page++) pages.push(page);
+    return pages;
+  }
+
+  get pageStart(): number {
+    if (this.totalUsers === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalUsers);
   }
 
   openRoleModal(user: any) {

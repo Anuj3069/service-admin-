@@ -51,10 +51,29 @@ import { AdminService } from '../../core/services/admin.service';
         </div>
 
         <!-- Pagination -->
-        <div class="glass-panel table-pagination" *ngIf="totalPages > 1">
-          <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="btn btn-secondary btn-small">Previous</button>
-          <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
-          <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" class="btn btn-secondary btn-small">Next</button>
+        <div class="glass-panel table-pagination">
+          <div class="pagination-summary">
+            Showing {{ pageStart }}-{{ pageEnd }} of {{ totalReviews }} reviews
+          </div>
+          <div class="pagination-controls">
+            <select class="form-control page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option [ngValue]="10">10 / page</option>
+              <option [ngValue]="25">25 / page</option>
+              <option [ngValue]="50">50 / page</option>
+            </select>
+            <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="btn btn-secondary btn-small">Prev</button>
+            <div class="page-numbers">
+              <button
+                *ngFor="let page of visiblePages"
+                class="btn btn-secondary btn-small page-btn"
+                [class.active]="page === currentPage"
+                (click)="changePage(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+            <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" class="btn btn-secondary btn-small">Next</button>
+          </div>
         </div>
       </div>
     </div>
@@ -69,7 +88,7 @@ import { AdminService } from '../../core/services/admin.service';
     .page-header h1 {
       font-size: 2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .page-header p {
       color: var(--text-muted);
@@ -107,7 +126,7 @@ import { AdminService } from '../../core/services/admin.service';
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
-      color: #fff;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -120,7 +139,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .user-meta .user-name {
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .user-meta .user-email {
       font-size: 0.8rem;
@@ -164,7 +183,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .worker-name {
       font-weight: 500;
-      color: #fff;
+      color: var(--text-main);
     }
     .no-records {
       text-align: center;
@@ -173,9 +192,6 @@ import { AdminService } from '../../core/services/admin.service';
       font-size: 0.95rem;
     }
     .table-pagination {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       padding: 16px 20px;
     }
     .page-indicator {
@@ -221,6 +237,28 @@ export class ReviewModeratorComponent {
       this.currentPage = page;
       this.loadReviews();
     }
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.loadReviews();
+  }
+
+  get visiblePages(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, Math.min(this.currentPage - 2, this.totalPages - 4));
+    const end = Math.min(this.totalPages, start + 4);
+    for (let page = start; page <= end; page++) pages.push(page);
+    return pages;
+  }
+
+  get pageStart(): number {
+    if (this.totalReviews === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalReviews);
   }
 
   getStars(rating: number): any[] {

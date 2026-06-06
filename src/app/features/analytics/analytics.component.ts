@@ -155,7 +155,7 @@ import { AdminService } from '../../core/services/admin.service';
       flex-wrap: wrap;
       gap: 16px;
     }
-    .page-header h1 { font-size: 2rem; font-weight: 600; color: #fff; }
+    .page-header h1 { font-size: 2rem; font-weight: 600; color: var(--text-main); }
     .page-header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
     .period-badge {
       background: rgba(99,102,241,0.15);
@@ -192,13 +192,13 @@ import { AdminService } from '../../core/services/admin.service';
       flex-shrink: 0;
     }
     .summary-label { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px; }
-    .summary-value { color: #fff; font-size: 1.25rem; font-weight: 700; }
+    .summary-value { color: var(--text-main); font-size: 1.25rem; font-weight: 700; }
     .summary-value.text-sm { font-size: 0.95rem; }
 
     /* Chart card */
     .chart-card { padding: 28px; }
     .chart-header { margin-bottom: 24px; }
-    .chart-header h2 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+    .chart-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
     .chart-subtitle { color: var(--text-muted); font-size: 0.82rem; }
 
     /* Loading */
@@ -277,7 +277,7 @@ import { AdminService } from '../../core/services/admin.service';
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.8);
-      color: #fff;
+      color: var(--text-main);
       padding: 3px 8px;
       border-radius: 6px;
       font-size: 0.7rem;
@@ -323,7 +323,7 @@ import { AdminService } from '../../core/services/admin.service';
       text-align: right;
       font-size: 0.82rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
 
     /* Two-column layout */
@@ -366,11 +366,11 @@ import { AdminService } from '../../core/services/admin.service';
       justify-content: center;
       font-weight: 700;
       font-size: 0.9rem;
-      color: #fff;
+      color: var(--text-main);
       flex-shrink: 0;
     }
     .leader-info { flex: 1; min-width: 0; }
-    .leader-name { font-size: 0.9rem; font-weight: 600; color: #fff; }
+    .leader-name { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
     .leader-stat { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
     .leader-rating { font-size: 0.85rem; font-weight: 600; color: #fbbf24; white-space: nowrap; }
     .star { font-size: 0.9rem; }

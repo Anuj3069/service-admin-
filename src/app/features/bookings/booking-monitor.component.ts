@@ -17,7 +17,7 @@ import { AdminService } from '../../core/services/admin.service';
       <!-- Filters -->
       <div class="glass-panel filters-card">
         <div class="filter-group">
-          <select class="form-control filter-select" [(ngModel)]="filterStatus" (change)="loadBookings()">
+          <select class="form-control filter-select" [(ngModel)]="filterStatus" (change)="onFilterChange()">
             <option value="">All Statuses</option>
             <option value="requested">Requested (Matching)</option>
             <option value="accepted">Accepted / In Progress</option>
@@ -78,10 +78,29 @@ import { AdminService } from '../../core/services/admin.service';
         </div>
 
         <!-- Pagination -->
-        <div class="table-pagination" *ngIf="totalPages > 1">
-          <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="btn btn-secondary btn-small">Previous</button>
-          <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
-          <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" class="btn btn-secondary btn-small">Next</button>
+        <div class="table-pagination">
+          <div class="pagination-summary">
+            Showing {{ pageStart }}-{{ pageEnd }} of {{ totalBookings }} bookings
+          </div>
+          <div class="pagination-controls">
+            <select class="form-control page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option [ngValue]="10">10 / page</option>
+              <option [ngValue]="25">25 / page</option>
+              <option [ngValue]="50">50 / page</option>
+            </select>
+            <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="btn btn-secondary btn-small">Prev</button>
+            <div class="page-numbers">
+              <button
+                *ngFor="let page of visiblePages"
+                class="btn btn-secondary btn-small page-btn"
+                [class.active]="page === currentPage"
+                (click)="changePage(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+            <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" class="btn btn-secondary btn-small">Next</button>
+          </div>
         </div>
       </div>
 
@@ -201,7 +220,7 @@ import { AdminService } from '../../core/services/admin.service';
     .page-header h1 {
       font-size: 2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .page-header p {
       color: var(--text-muted);
@@ -242,16 +261,9 @@ import { AdminService } from '../../core/services/admin.service';
       color: var(--text-muted);
     }
     .table-pagination {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 12px 4px 12px;
       border-top: 1px solid var(--border);
       margin-top: 12px;
-    }
-    .page-indicator {
-      font-size: 0.875rem;
-      color: var(--text-muted);
+      padding: 16px 4px 4px;
     }
     .details-modal {
       max-width: 600px;
@@ -267,7 +279,7 @@ import { AdminService } from '../../core/services/admin.service';
       font-size: 0.95rem;
       font-weight: 600;
       margin-bottom: 12px;
-      color: #fff;
+      color: var(--text-main);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -347,6 +359,33 @@ export class BookingMonitorComponent {
       this.currentPage = page;
       this.loadBookings();
     }
+  }
+
+  onFilterChange() {
+    this.currentPage = 1;
+    this.loadBookings();
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.loadBookings();
+  }
+
+  get visiblePages(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, Math.min(this.currentPage - 2, this.totalPages - 4));
+    const end = Math.min(this.totalPages, start + 4);
+    for (let page = start; page <= end; page++) pages.push(page);
+    return pages;
+  }
+
+  get pageStart(): number {
+    if (this.totalBookings === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalBookings);
   }
 
   getStatusClass(status: string): string {

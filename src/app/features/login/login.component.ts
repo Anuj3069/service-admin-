@@ -15,6 +15,7 @@ import { AdminService } from '../../core/services/admin.service';
           <div class="logo-icon">🛡️</div>
           <h2>Admin Portal</h2>
           <p>Service Booking Management System</p>
+          <span class="small-tag">Secure access to user, booking, and revenue controls.</span>
         </div>
 
         <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
@@ -72,13 +73,14 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .login-card {
       width: 100%;
-      max-width: 420px;
-      padding: 40px 32px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      max-width: 440px;
+      padding: 42px 34px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .login-header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 34px;
     }
     .logo-icon {
       font-size: 3rem;
@@ -87,12 +89,18 @@ import { AdminService } from '../../core/services/admin.service';
     .login-header h2 {
       font-size: 1.75rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
       margin-bottom: 6px;
     }
     .login-header p {
-      font-size: 0.875rem;
+      font-size: 0.95rem;
       color: var(--text-muted);
+    }
+    .small-tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.72);
     }
     .error-message {
       width: 100%;

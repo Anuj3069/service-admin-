@@ -101,7 +101,7 @@ import { AdminService } from '../../core/services/admin.service';
     .page-header h1 {
       font-size: 2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .page-header p {
       color: var(--text-muted);
@@ -148,7 +148,7 @@ import { AdminService } from '../../core/services/admin.service';
     .stat-value {
       font-size: 1.75rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-main);
     }
 
     .dashboard-charts {
@@ -170,7 +170,7 @@ import { AdminService } from '../../core/services/admin.service';
     .card-title {
       font-size: 1.1rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .chart-container {
       display: flex;

@@ -211,7 +211,7 @@ import { AdminService } from '../../core/services/admin.service';
     .page-header h1 {
       font-size: 2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .page-header p {
       color: var(--text-muted);
@@ -246,7 +246,7 @@ import { AdminService } from '../../core/services/admin.service';
     .pane-header h3 {
       font-size: 1.2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .pane-body {
       display: flex;
@@ -289,7 +289,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .cat-name {
       font-weight: 500;
-      color: #fff;
+      color: var(--text-main);
     }
     .cat-services-count {
       font-size: 0.8rem;
@@ -352,7 +352,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .svc-name {
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
       font-size: 1.05rem;
     }
     .svc-description {

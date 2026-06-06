@@ -87,7 +87,7 @@ import { AdminService } from '../../core/services/admin.service';
     .page-header h1 {
       font-size: 2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .page-header p {
       color: var(--text-muted);
@@ -107,7 +107,7 @@ import { AdminService } from '../../core/services/admin.service';
       margin-bottom: 24px;
     }
     label {
-      color: #fff;
+      color: var(--text-main);
       font-weight: 500;
       font-size: 0.95rem;
     }
@@ -116,7 +116,7 @@ import { AdminService } from '../../core/services/admin.service';
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px 16px;
-      color: #fff;
+      color: var(--text-main);
       font-size: 1rem;
       transition: var(--transition-smooth);
     }
@@ -143,7 +143,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .btn-primary {
       background: var(--primary);
-      color: #fff;
+      color: var(--text-main);
     }
     .btn-primary:hover:not(:disabled) {
       background: #4f46e5;

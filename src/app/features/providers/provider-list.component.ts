@@ -17,13 +17,13 @@ import { AdminService } from '../../core/services/admin.service';
       <!-- Filters -->
       <div class="glass-panel filters-card">
         <div class="filter-group">
-          <select class="form-control filter-select" [(ngModel)]="filterVerified" (change)="loadProviders()">
+          <select class="form-control filter-select" [(ngModel)]="filterVerified" (change)="onFilterChange()">
             <option value="">All Verification Statuses</option>
             <option value="true">Verified Only</option>
             <option value="false">Unverified (Pending Approval)</option>
           </select>
 
-          <select class="form-control filter-select" [(ngModel)]="filterAvailable" (change)="loadProviders()">
+          <select class="form-control filter-select" [(ngModel)]="filterAvailable" (change)="onFilterChange()">
             <option value="">All Availabilities</option>
             <option value="true">Available / Online</option>
             <option value="false">Offline</option>
@@ -96,6 +96,31 @@ import { AdminService } from '../../core/services/admin.service';
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="table-pagination">
+          <div class="pagination-summary">
+            Showing {{ pageStart }}-{{ pageEnd }} of {{ totalProviders }} providers
+          </div>
+          <div class="pagination-controls">
+            <select class="form-control page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option [ngValue]="10">10 / page</option>
+              <option [ngValue]="25">25 / page</option>
+              <option [ngValue]="50">50 / page</option>
+            </select>
+            <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="btn btn-secondary btn-small">Prev</button>
+            <div class="page-numbers">
+              <button
+                *ngFor="let page of visiblePages"
+                class="btn btn-secondary btn-small page-btn"
+                [class.active]="page === currentPage"
+                (click)="changePage(page)"
+              >
+                {{ page }}
+              </button>
+            </div>
+            <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" class="btn btn-secondary btn-small">Next</button>
+          </div>
         </div>
       </div>
 
@@ -181,7 +206,7 @@ import { AdminService } from '../../core/services/admin.service';
     .page-header h1 {
       font-size: 2rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-main);
     }
     .page-header p {
       color: var(--text-muted);
@@ -214,7 +239,7 @@ import { AdminService } from '../../core/services/admin.service';
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
-      color: #fff;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -227,7 +252,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .prov-details .name {
       font-weight: 500;
-      color: #fff;
+      color: var(--text-main);
     }
     .prov-details .email {
       font-size: 0.8rem;
@@ -250,7 +275,7 @@ import { AdminService } from '../../core/services/admin.service';
     }
     .jobs-rating .rating {
       font-weight: 500;
-      color: #fff;
+      color: var(--text-main);
     }
     .jobs-rating .jobs {
       font-size: 0.8rem;
@@ -260,6 +285,11 @@ import { AdminService } from '../../core/services/admin.service';
       text-align: center;
       padding: 40px 0;
       color: var(--text-muted);
+    }
+    .table-pagination {
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+      padding: 16px 4px 4px;
     }
     .form-grid {
       display: grid;
@@ -291,6 +321,11 @@ export class ProviderListComponent {
   filterVerified = '';
   filterAvailable = '';
 
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
+  totalProviders = 0;
+
   showModal = false;
   modalProvider: any = null;
   editSkills = '';
@@ -305,6 +340,8 @@ export class ProviderListComponent {
 
   loadProviders() {
     const filters = {
+      page: this.currentPage,
+      limit: this.pageSize,
       isVerified: this.filterVerified,
       isAvailable: this.filterAvailable
     };
@@ -312,11 +349,47 @@ export class ProviderListComponent {
     this.adminService.getProviders(filters).subscribe({
       next: (res) => {
         this.providers = res.data?.items || [];
+        this.totalProviders = res.data?.total || 0;
+        this.totalPages = Math.ceil(this.totalProviders / this.pageSize) || 1;
       },
       error: (err) => {
         console.error('Error loading providers:', err);
       }
     });
+  }
+
+  onFilterChange() {
+    this.currentPage = 1;
+    this.loadProviders();
+  }
+
+  onPageSizeChange() {
+    this.currentPage = 1;
+    this.loadProviders();
+  }
+
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProviders();
+    }
+  }
+
+  get visiblePages(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, Math.min(this.currentPage - 2, this.totalPages - 4));
+    const end = Math.min(this.totalPages, start + 4);
+    for (let page = start; page <= end; page++) pages.push(page);
+    return pages;
+  }
+
+  get pageStart(): number {
+    if (this.totalProviders === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get pageEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalProviders);
   }
 
   toggleVerification(prov: any) {
