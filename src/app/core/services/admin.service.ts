@@ -158,4 +158,11 @@ export class AdminService {
   deleteReview(id: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/admin/reviews/${id}`);
   }
+
+  // ── KYC MANAGEMENT ──────────────────────────────────────────
+  reviewKyc(userId: string, action: 'approve' | 'reject', rejectionReason?: string): Observable<any> {
+    const body: any = { action };
+    if (rejectionReason) body.rejectionReason = rejectionReason;
+    return this.http.patch<any>(`${this.apiUrl}/admin/providers/${userId}/kyc`, body);
+  }
 }
