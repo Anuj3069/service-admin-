@@ -9,27 +9,27 @@ import { AdminService } from '../../core/services/admin.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="login-container">
-      <div class="glass-panel login-card animate-fade-in">
-        <div class="login-header">
-          <div class="logo-icon">🛡️</div>
-          <h2>Admin Portal</h2>
-          <p>Service Booking Management System</p>
-          <span class="small-tag">Secure access to user, booking, and revenue controls.</span>
+    <div class="flex items-center justify-center min-h-screen bg-[radial-gradient(circle_at_50%_50%,#1e1b4b_0%,#0f172a_100%)] p-5">
+      <div class="w-full max-w-[440px] p-10 bg-bgCard/90 border border-white/10 rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.45)] backdrop-blur-md animate-fade-in">
+        <div class="text-center mb-8">
+          <div class="text-5xl mb-3">🛡️</div>
+          <h2 class="text-2xl font-bold tracking-tight text-textMain mb-1.5">Admin Portal</h2>
+          <p class="text-sm text-textMuted mb-2">Service Booking Management System</p>
+          <span class="inline-block mt-3 text-xs text-white/70 bg-white/5 border border-white/10 rounded-full px-3 py-1">Secure access to user, booking, and revenue controls.</span>
         </div>
 
-        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-          <div *ngIf="errorMessage" class="error-message badge badge-danger">
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="space-y-5">
+          <div *ngIf="errorMessage" class="w-full text-center px-3 py-2 text-xs font-semibold rounded-lg bg-danger/10 text-danger border border-danger/25">
             {{ errorMessage }}
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="email">Admin Email</label>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-bold text-textMuted uppercase tracking-wider" for="email">Admin Email</label>
             <input
               type="email"
               id="email"
               name="email"
-              class="form-control"
+              class="w-full bg-bgCard border border-border text-textMain px-3 py-2.5 text-sm rounded-lg outline-none transition-all duration-200 focus:border-primary focus:ring-4 focus:ring-primary/15"
               placeholder="admin@example.com"
               [(ngModel)]="email"
               required
@@ -37,13 +37,13 @@ import { AdminService } from '../../core/services/admin.service';
             />
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="password">Password</label>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-bold text-textMuted uppercase tracking-wider" for="password">Password</label>
             <input
               type="password"
               id="password"
               name="password"
-              class="form-control"
+              class="w-full bg-bgCard border border-border text-textMain px-3 py-2.5 text-sm rounded-lg outline-none transition-all duration-200 focus:border-primary focus:ring-4 focus:ring-primary/15"
               placeholder="••••••••"
               [(ngModel)]="password"
               required
@@ -52,9 +52,13 @@ import { AdminService } from '../../core/services/admin.service';
 
           <button
             type="submit"
-            class="btn btn-primary login-btn"
+            class="w-full mt-4 flex items-center justify-center gap-2 py-3 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm rounded-lg shadow-lg hover:shadow-primary/20 transition-all duration-200"
             [disabled]="loginForm.invalid || loading"
           >
+            <svg *ngIf="loading" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
             <span *ngIf="loading">Logging in...</span>
             <span *ngIf="!loading">Secure Login</span>
           </button>
@@ -62,63 +66,7 @@ import { AdminService } from '../../core/services/admin.service';
       </div>
     </div>
   `,
-  styles: [`
-    .login-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0f172a 100%);
-      padding: 20px;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 440px;
-      padding: 42px 34px;
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .login-header {
-      text-align: center;
-      margin-bottom: 34px;
-    }
-    .logo-icon {
-      font-size: 3rem;
-      margin-bottom: 12px;
-    }
-    .login-header h2 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 6px;
-    }
-    .login-header p {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-    .small-tag {
-      display: inline-block;
-      margin-top: 12px;
-      font-size: 0.82rem;
-      color: rgba(255, 255, 255, 0.72);
-    }
-    .error-message {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 0.875rem;
-      display: block;
-      text-align: center;
-    }
-    .login-btn {
-      width: 100%;
-      margin-top: 15px;
-      padding: 12px;
-      font-size: 1rem;
-      letter-spacing: 0.025em;
-    }
-  `]
+  styles: []
 })
 export class LoginComponent {
   private adminService = inject(AdminService);

@@ -1,355 +1,216 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="admin-container">
-      <aside class="sidebar" [class.mobile-open]="sidebarOpen">
-        <div class="sidebar-brand">
-          <span class="brand-icon">A</span>
-          <div>
-            <span class="brand-name">Admin Console</span>
-            <p class="brand-subtitle">Service booking control</p>
+    <div class="flex min-h-screen" style="background: var(--bg-shell)">
+
+      <!-- ╔══════════════════════════════════════════╗
+           ║           PREMIUM SIDEBAR                ║
+           ╚══════════════════════════════════════════╝ -->
+      <aside
+        class="w-[270px] fixed top-0 bottom-0 left-0 z-50 flex flex-col transition-transform duration-300 ease-spring lg:translate-x-0"
+        [class.translate-x-0]="sidebarOpen"
+        [class.-translate-x-full]="!sidebarOpen"
+        style="background: var(--sidebar-gradient); border-right: 1px solid var(--border);"
+      >
+        <!-- Brand logo -->
+        <div class="flex items-center gap-3.5 px-6 py-5 border-b" style="border-color: var(--border)">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-glow-primary flex-shrink-0"
+               style="background: var(--sidebar-accent); box-shadow: 0 6px 20px rgba(99,102,241,0.4)">
+            A
           </div>
+          <div>
+            <div class="text-sm font-black tracking-tight" style="color: var(--text-main)">Admin Console</div>
+            <div class="text-[10px] font-semibold" style="color: var(--text-muted)">ServiceApp Control</div>
+          </div>
+          <!-- Close btn on mobile -->
+          <button class="ml-auto lg:hidden w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                  style="background: var(--bg-soft); color: var(--text-muted)"
+                  (click)="closeSidebar()">✕</button>
         </div>
 
-        <nav class="sidebar-nav">
-          <a *ngFor="let item of navItems" [routerLink]="item.path" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-            <span class="nav-icon">{{ item.index }}</span>
-            <span>{{ item.label }}</span>
+        <!-- Nav Section Label -->
+        <div class="px-6 pt-5 pb-2">
+          <span class="text-[9px] font-black uppercase tracking-[0.12em]" style="color: var(--text-subtle)">Navigation</span>
+        </div>
+
+        <!-- Nav items -->
+        <nav class="flex-1 px-3 pb-4 flex flex-col gap-0.5 overflow-y-auto">
+          <a
+            *ngFor="let item of navItems; let i = index"
+            [routerLink]="item.path"
+            routerLinkActive="nav-active"
+            [routerLinkActiveOptions]="{ exact: false }"
+            (click)="closeSidebar()"
+            class="group flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 border border-transparent relative overflow-hidden"
+            style="color: var(--text-muted)"
+            [style.animation-delay]="(i * 40) + 'ms'"
+          >
+            <!-- Hover background -->
+            <span class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style="background: rgba(var(--primary-rgb), 0.07)"></span>
+
+            <!-- Icon box -->
+            <span class="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0 relative z-10 transition-all duration-200 group-hover:scale-110"
+                  [style]="getNavIconStyle(item.path)">
+              {{ item.icon }}
+            </span>
+
+            <span class="relative z-10 leading-tight">{{ item.label }}</span>
+
+            <!-- Active indicator dot -->
+            <span class="ml-auto relative z-10 w-1.5 h-1.5 rounded-full opacity-0 nav-dot transition-opacity duration-200"
+                  style="background: var(--primary)"></span>
           </a>
         </nav>
 
-        <div class="sidebar-footer">
-          <button (click)="logout()" class="btn btn-secondary logout-btn">
-            <span>Exit</span>
-            <span>Logout</span>
+        <!-- Sidebar footer -->
+        <div class="p-4 border-t" style="border-color: var(--border)">
+          <!-- Admin user mini card -->
+          <div class="flex items-center gap-3 p-3 rounded-xl mb-3" style="background: var(--bg-soft)">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-black flex-shrink-0"
+                 style="background: var(--sidebar-accent)">
+              {{ adminInitial }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-bold truncate" style="color: var(--text-main)">{{ adminName }}</div>
+              <div class="text-[10px]" style="color: var(--text-muted)">Super Admin</div>
+            </div>
+            <div class="w-2 h-2 rounded-full flex-shrink-0" style="background: var(--success); box-shadow: 0 0 6px rgba(16,185,129,0.6)"></div>
+          </div>
+
+          <button (click)="logout()"
+                  class="w-full py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold text-xs transition-all duration-200 border"
+                  style="background: rgba(var(--danger-rgb), 0.08); border-color: rgba(var(--danger-rgb), 0.2); color: var(--danger)"
+                  onmouseover="this.style.background='rgba(239,68,68,0.15)'"
+                  onmouseout="this.style.background='rgba(239,68,68,0.08)'">
+            <span>⎋</span>
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
-      <div class="main-wrapper">
-        <header class="top-header glass-panel">
-          <button class="mobile-toggle" aria-label="Toggle navigation" (click)="toggleSidebar()">Menu</button>
-          <div class="header-left">
-            <div class="page-label">Admin Workspace</div>
-            <div class="page-title">{{ currentPageTitle }}</div>
+      <!-- Mobile overlay -->
+      <div class="fixed inset-0 z-40 lg:hidden transition-opacity duration-300"
+           [class.opacity-0]="!sidebarOpen"
+           [class.pointer-events-none]="!sidebarOpen"
+           style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);"
+           *ngIf="sidebarOpen"
+           (click)="closeSidebar()">
+      </div>
+
+      <!-- ╔══════════════════════════════════════════╗
+           ║            MAIN CONTENT AREA             ║
+           ╚══════════════════════════════════════════╝ -->
+      <div class="flex-1 lg:ml-[270px] flex flex-col min-w-0">
+
+        <!-- ── TOP HEADER BAR ── -->
+        <header class="sticky top-0 z-30 flex items-center gap-4 px-6 py-4"
+                style="background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);">
+
+          <!-- Mobile hamburger -->
+          <button class="flex lg:hidden w-9 h-9 rounded-xl items-center justify-center transition-colors border font-bold text-base"
+                  style="background: var(--bg-soft); border-color: var(--border); color: var(--text-muted)"
+                  (click)="toggleSidebar()" aria-label="Open navigation">
+            ☰
+          </button>
+
+          <!-- Page breadcrumb -->
+          <div class="hidden sm:block">
+            <div class="text-[10px] font-black uppercase tracking-widest" style="color: var(--text-subtle)">Admin / {{ currentPageTitle }}</div>
+            <div class="text-base font-black leading-tight" style="color: var(--text-main)">{{ currentPageTitle }}</div>
           </div>
-          <div class="header-actions">
-            <label class="search-box">
-              <span>Search</span>
-              <input type="search" placeholder="Search users, bookings..." [(ngModel)]="searchQuery" />
-            </label>
-            <button class="theme-toggle" type="button" (click)="toggleTheme()" [attr.aria-label]="'Switch to ' + nextThemeLabel + ' mode'">
-              <span class="theme-state">{{ themeMode === 'dark' ? 'Dark' : 'Light' }}</span>
-              <span>{{ nextThemeLabel }}</span>
-            </button>
-            <div class="header-profile" *ngIf="adminName">
-              <div class="avatar">{{ adminInitial }}</div>
-              <div class="profile-text">
-                <span>{{ adminName }}</span>
-                <small>Administrator</small>
-              </div>
+
+          <!-- Spacer -->
+          <div class="flex-1"></div>
+
+          <!-- Search -->
+          <label class="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl border w-full max-w-[240px] transition-all duration-200"
+                 style="background: var(--bg-soft); border-color: var(--border)"
+                 onfocusin="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.1)'"
+                 onfocusout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <span class="text-sm" style="color: var(--text-subtle)">🔍</span>
+            <input type="search" placeholder="Search..."
+                   class="w-full bg-transparent border-none outline-none text-sm"
+                   style="color: var(--text-main); font-family: var(--font-sans)"
+                   [(ngModel)]="searchQuery" />
+          </label>
+
+          <!-- Notification bell -->
+          <button class="relative w-9 h-9 rounded-xl flex items-center justify-center border transition-all duration-200"
+                  style="background: var(--bg-soft); border-color: var(--border); color: var(--text-muted)"
+                  onmouseover="this.style.background='var(--bg-card)'"
+                  onmouseout="this.style.background='var(--bg-soft)'">
+            🔔
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full border-2"
+                  style="background: var(--danger); border-color: var(--bg-soft)"></span>
+          </button>
+
+          <!-- Theme toggle -->
+          <button class="w-9 h-9 rounded-xl flex items-center justify-center border transition-all duration-200 text-base"
+                  style="background: var(--bg-soft); border-color: var(--border)"
+                  (click)="toggleTheme()"
+                  [attr.aria-label]="'Switch theme'"
+                  onmouseover="this.style.background='var(--bg-card)'"
+                  onmouseout="this.style.background='var(--bg-soft)'">
+            {{ themeMode === 'dark' ? '☀️' : '🌙' }}
+          </button>
+
+          <!-- Admin avatar -->
+          <div class="flex items-center gap-2.5 pl-3 border-l" style="border-color: var(--border)" *ngIf="adminName">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black shadow-sm"
+                 style="background: var(--sidebar-accent)">
+              {{ adminInitial }}
+            </div>
+            <div class="hidden xl:block text-right">
+              <div class="text-xs font-bold" style="color: var(--text-main)">{{ adminName }}</div>
+              <div class="text-[10px]" style="color: var(--text-muted)">Administrator</div>
             </div>
           </div>
         </header>
 
-        <main class="main-content">
+        <!-- ── PAGE CONTENT ── -->
+        <main class="flex-1 p-6 md:p-8">
           <router-outlet></router-outlet>
         </main>
-      </div>
 
-      <div class="mobile-overlay" *ngIf="sidebarOpen" (click)="closeSidebar()"></div>
+        <!-- ── FOOTER BAR ── -->
+        <footer class="px-8 py-4 flex items-center justify-between text-[10px] font-semibold border-t"
+                style="color: var(--text-subtle); border-color: var(--border)">
+          <span>© 2025 ServiceApp Admin Console</span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full" style="background: var(--success)"></span>
+            All systems operational
+          </span>
+        </footer>
+      </div>
     </div>
   `,
   styles: [`
-    .admin-container {
-      display: flex;
-      min-height: 100vh;
-      background: var(--bg-shell);
+    .nav-active {
+      background: rgba(var(--primary-rgb), 0.1) !important;
+      color: var(--primary) !important;
+      border-color: rgba(var(--primary-rgb), 0.2) !important;
     }
-    .sidebar {
-      width: 280px;
-      background: var(--bg-sidebar);
-      border-right: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 100;
-      transition: var(--transition-smooth);
+    .nav-active .nav-dot {
+      opacity: 1 !important;
     }
-    .sidebar-brand {
-      min-height: 88px;
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
-      gap: 14px;
-      border-bottom: 1px solid var(--border);
+    :root[data-theme='dark'] header {
+      background: rgba(22, 27, 46, 0.9) !important;
     }
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--primary);
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 800;
-    }
-    .brand-name {
-      display: block;
-      font-size: 1.12rem;
-      font-weight: 800;
-      color: var(--text-main);
-      letter-spacing: 0;
-    }
-    .brand-subtitle {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-    .sidebar-nav {
-      flex: 1;
-      padding: 20px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 16px;
-      color: var(--text-muted);
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 700;
-      transition: var(--transition-smooth);
-    }
-    .nav-item:hover {
-      background: var(--bg-soft);
-      color: var(--text-main);
-      transform: translateX(2px);
-    }
-    .nav-item.active {
-      background: rgba(37, 99, 235, 0.12);
-      color: var(--primary);
-      box-shadow: inset 3px 0 0 var(--primary);
-    }
-    .nav-icon {
-      width: 28px;
-      color: var(--text-subtle);
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0;
-    }
-    .sidebar-footer {
-      padding: 22px 18px;
-      border-top: 1px solid var(--border);
-    }
-    .logout-btn {
-      width: 100%;
-      background: rgba(220, 38, 38, 0.1);
-      border-color: rgba(220, 38, 38, 0.18);
-      color: var(--danger);
-    }
-    .logout-btn:hover {
-      background: rgba(220, 38, 38, 0.16);
-      border-color: rgba(220, 38, 38, 0.28);
-    }
-    .main-wrapper {
-      flex: 1;
-      margin-left: 280px;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      padding-bottom: 28px;
-    }
-    .top-header {
-      min-height: 82px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      gap: 18px;
-      margin: 20px 20px 0;
-      position: sticky;
-      top: 16px;
-      z-index: 90;
-    }
-    .mobile-toggle {
-      display: none;
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      font-weight: 800;
-      padding: 8px 10px;
-      cursor: pointer;
-    }
-    .header-left {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 170px;
-    }
-    .page-label {
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      font-weight: 800;
-    }
-    .page-title {
-      font-size: 1.28rem;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      width: 100%;
-      justify-content: flex-end;
-    }
-    .search-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 0 12px;
-      min-width: 280px;
-      min-height: 42px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--bg-soft);
-      color: var(--text-muted);
-      transition: var(--transition-smooth);
-      font-size: 0.78rem;
-      font-weight: 800;
-    }
-    .search-box input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-main);
-      font-size: 0.92rem;
-    }
-    .search-box:hover,
-    .search-box:focus-within {
-      border-color: var(--primary);
-      background: var(--bg-card);
-    }
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 42px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg-card);
-      color: var(--text-main);
-      padding: 8px 12px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: var(--transition-smooth);
-    }
-    .theme-toggle:hover {
-      border-color: var(--border-strong);
-      background: var(--bg-card-hover);
-    }
-    .theme-state {
-      color: var(--text-muted);
-      font-size: 0.78rem;
-    }
-    .header-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-left: 4px;
-    }
-    .profile-text {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 120px;
-      text-align: right;
-    }
-    .profile-text span {
-      font-weight: 800;
-      color: var(--text-main);
-    }
-    .profile-text small {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-    }
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: var(--primary);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      box-shadow: var(--shadow-sm);
-    }
-    .main-content {
-      padding: 32px;
-      flex: 1;
-      min-height: calc(100vh - 170px);
-    }
-    .mobile-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.55);
-      z-index: 45;
-    }
-    @media (max-width: 991px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      .sidebar.mobile-open {
-        transform: translateX(0);
-      }
-      .main-wrapper {
-        margin-left: 0;
-      }
-      .mobile-toggle {
-        display: block;
-      }
-      .top-header {
-        padding: 16px;
-        margin: 16px 16px 0;
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
-      .header-actions,
-      .search-box,
-      .theme-toggle {
-        width: 100%;
-      }
-      .main-content {
-        padding: 24px 16px;
-      }
+    .ease-spring {
+      transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     }
   `]
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   private router = inject(Router);
 
   sidebarOpen = false;
@@ -358,39 +219,55 @@ export class AdminLayoutComponent {
   themeMode: 'light' | 'dark' = 'light';
 
   navItems = [
-    { index: '01', label: 'Dashboard', path: 'dashboard' },
-    { index: '02', label: 'Analytics', path: 'analytics' },
-    { index: '03', label: 'Users', path: 'users' },
-    { index: '04', label: 'Providers', path: 'providers' },
-    { index: '05', label: 'Catalog', path: 'catalog' },
-    { index: '06', label: 'Bookings', path: 'bookings' },
-    { index: '07', label: 'Payments', path: 'payments' },
-    { index: '08', label: 'Reviews', path: 'reviews' },
-    { index: '09', label: 'Settings', path: 'settings' }
+    { icon: '🏠', label: 'Dashboard',  path: 'dashboard' },
+    { icon: '📊', label: 'Analytics',  path: 'analytics' },
+    { icon: '👤', label: 'Users',      path: 'users' },
+    { icon: '🛠️', label: 'Providers',  path: 'providers' },
+    { icon: '🗂️', label: 'Catalog',    path: 'catalog' },
+    { icon: '📅', label: 'Bookings',   path: 'bookings' },
+    { icon: '💳', label: 'Payments',   path: 'payments' },
+    { icon: '⭐', label: 'Reviews',    path: 'reviews' },
+    { icon: '⚙️', label: 'Settings',   path: 'settings' },
   ];
 
-  get currentPageTitle() {
-    const routeName = this.router.url.split('/').pop() || 'dashboard';
-    const titles: Record<string, string> = {
-      dashboard: 'Overview',
-      analytics: 'Analytics',
-      users: 'Users',
-      providers: 'Providers',
-      catalog: 'Catalog',
-      bookings: 'Booking Monitor',
-      payments: 'Payments',
-      reviews: 'Review Moderator',
-      settings: 'Settings'
-    };
-    return titles[routeName] || 'Admin Workspace';
+  private pageTitles: Record<string, string> = {
+    dashboard: 'Overview',
+    analytics: 'Analytics',
+    users: 'Users',
+    providers: 'Provider Moderation',
+    catalog: 'Service Catalog',
+    bookings: 'Booking Monitor',
+    payments: 'Payments',
+    reviews: 'Review Moderator',
+    settings: 'Settings',
+  };
+
+  get currentPageTitle(): string {
+    const segment = this.router.url.split('/').pop() || 'dashboard';
+    return this.pageTitles[segment] || 'Admin Workspace';
   }
 
-  get adminInitial() {
+  get adminInitial(): string {
     return this.adminName ? this.adminName.charAt(0).toUpperCase() : 'A';
   }
 
-  get nextThemeLabel() {
+  get nextThemeLabel(): string {
     return this.themeMode === 'dark' ? 'Light' : 'Dark';
+  }
+
+  getNavIconStyle(path: string): string {
+    const colorMap: Record<string, string> = {
+      dashboard: 'background: rgba(99,102,241,0.12); color: #6366f1',
+      analytics:  'background: rgba(6,182,212,0.12); color: #06b6d4',
+      users:      'background: rgba(245,158,11,0.12); color: #f59e0b',
+      providers:  'background: rgba(16,185,129,0.12); color: #10b981',
+      catalog:    'background: rgba(168,85,247,0.12); color: #a855f7',
+      bookings:   'background: rgba(239,68,68,0.12); color: #ef4444',
+      payments:   'background: rgba(34,197,94,0.12); color: #22c55e',
+      reviews:    'background: rgba(251,191,36,0.12); color: #fbbf24',
+      settings:   'background: rgba(148,163,184,0.12); color: #94a3b8',
+    };
+    return colorMap[path] || 'background: var(--bg-soft); color: var(--text-muted)';
   }
 
   ngOnInit() {
@@ -409,13 +286,8 @@ export class AdminLayoutComponent {
     }
   }
 
-  toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
-  }
-
-  closeSidebar() {
-    this.sidebarOpen = false;
-  }
+  toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
+  closeSidebar()  { this.sidebarOpen = false; }
 
   toggleTheme() {
     this.themeMode = this.themeMode === 'dark' ? 'light' : 'dark';

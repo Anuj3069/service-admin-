@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
@@ -8,51 +8,67 @@ import { AdminService } from '../../core/services/admin.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="catalog-wrapper animate-fade-in">
-      <div class="page-header">
-        <h1>Catalog Management</h1>
-        <p>Define categories and spec offerings, modify pricing sheets, and toggle active catalog listings</p>
+    <div class="flex flex-col gap-6 animate-fade-in">
+
+      <!-- ─── Page Header ──────────────────────────────────── -->
+      <div class="animate-slide-up">
+        <div class="flex items-center gap-3 mb-1.5">
+          <div class="w-1.5 h-7 rounded-full bg-gradient-to-b from-primary to-accent"></div>
+          <h1 class="text-2xl font-black tracking-tight text-textMain">Catalog Management</h1>
+        </div>
+        <p class="text-sm pl-5 text-textMuted">Define categories and spec offerings, modify pricing sheets, and toggle active catalog listings</p>
       </div>
 
-      <div class="catalog-grid">
+      <!-- ─── Main Grid Layout ──────────────────────────────── -->
+      <div class="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 items-start animate-slide-up [animation-delay:60ms]">
+        
         <!-- Categories Panel (Left) -->
-        <div class="glass-panel pane-card">
-          <div class="pane-header">
-            <h3>Categories</h3>
-            <button class="btn btn-primary btn-small" (click)="openCategoryModal()">➕ Add</button>
+        <div class="p-5 rounded-3xl border border-border bg-bgCard shadow-sm flex flex-col gap-4 min-h-[480px]">
+          <div class="flex justify-between items-center pb-3 border-b border-border">
+            <h3 class="text-base font-black text-textMain">Categories</h3>
+            <button class="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-black shadow-md shadow-primary/20 transition-all active:scale-95" 
+                    (click)="openCategoryModal()">➕ Add</button>
           </div>
           
-          <div class="pane-body">
-            <div
+          <div class="flex flex-col gap-2.5">
+            <button
               *ngFor="let cat of categories"
-              class="cat-item"
-              [class.active]="selectedCategory?._id === cat._id"
-              [class.inactive]="!cat.isActive"
+              class="w-full text-left flex justify-between items-center p-3 rounded-2xl border transition-all duration-200"
+              [ngClass]="[
+                selectedCategory?._id === cat._id
+                  ? 'bg-primary/10 border-primary text-primary shadow-sm shadow-primary/5'
+                  : 'bg-bgSoft/40 border-border text-textMuted hover:border-borderStrong hover:text-textMain',
+                !cat.isActive ? 'opacity-55' : ''
+              ]"
               (click)="selectCategory(cat)"
             >
-              <div class="cat-details">
-                <span class="cat-icon">{{ cat.icon || '🔧' }}</span>
-                <div class="cat-meta">
-                  <span class="cat-name">{{ cat.name }}</span>
-                  <span class="cat-services-count">{{ cat.services?.length || 0 }} services</span>
+              <div class="flex items-center gap-3">
+                <span class="text-2xl bg-bgCard w-10 h-10 rounded-xl flex items-center justify-center border border-border shadow-sm">{{ cat.icon || '🔧' }}</span>
+                <div class="flex flex-col">
+                  <span class="text-sm font-bold" [ngClass]="selectedCategory?._id === cat._id ? 'text-primary' : 'text-textMain'">{{ cat.name }}</span>
+                  <span class="text-[10px] text-textMuted font-semibold">{{ cat.services?.length || 0 }} services</span>
                 </div>
               </div>
-              <div class="cat-actions" (click)="$event.stopPropagation()">
-                <button (click)="openCategoryModal(cat)" class="action-btn">✏️</button>
-                <button *ngIf="cat.isActive" (click)="deleteCategory(cat)" class="action-btn delete">🗑️</button>
-                <span *ngIf="!cat.isActive" class="badge badge-muted">Inactive</span>
+              <div class="flex items-center gap-1.5" (click)="$event.stopPropagation()">
+                <button (click)="openCategoryModal(cat)" 
+                        class="w-7 h-7 rounded-lg border border-border bg-bgCard text-textMuted hover:text-primary hover:border-primary/20 flex items-center justify-center text-xs transition-all active:scale-90 shadow-sm">✏️</button>
+                <button *ngIf="cat.isActive" (click)="deleteCategory(cat)" 
+                        class="w-7 h-7 rounded-lg border border-danger/20 bg-danger/5 text-danger flex items-center justify-center text-xs transition-all hover:bg-danger/10 hover:border-danger/35 active:scale-90 shadow-sm">🗑️</button>
+                <span *ngIf="!cat.isActive" class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-borderStrong/20 text-textSubtle border border-borderStrong">Inactive</span>
               </div>
-            </div>
-            <div *ngIf="categories.length === 0" class="no-data">No categories defined.</div>
+            </button>
+            <div *ngIf="categories.length === 0" class="py-16 text-center text-xs font-bold text-textSubtle">No categories defined.</div>
           </div>
         </div>
 
         <!-- Services Panel (Right) -->
-        <div class="glass-panel pane-card">
-          <div class="pane-header">
-            <h3>Services under {{ selectedCategory ? selectedCategory.name : 'Selected Category' }}</h3>
+        <div class="p-5 rounded-3xl border border-border bg-bgCard shadow-sm flex flex-col gap-4 min-h-[480px]">
+          <div class="flex justify-between items-center pb-3 border-b border-border">
+            <h3 class="text-base font-black text-textMain">
+              Services under <span class="text-primary font-black">{{ selectedCategory ? selectedCategory.name : 'Selected Category' }}</span>
+            </h3>
             <button
-              class="btn btn-primary btn-small"
+              class="px-4 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-black shadow-md shadow-primary/20 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
               [disabled]="!selectedCategory || !selectedCategory.isActive"
               (click)="openServiceModal()"
             >
@@ -60,40 +76,46 @@ import { AdminService } from '../../core/services/admin.service';
             </button>
           </div>
           
-          <div class="pane-body">
-            <div *ngIf="!selectedCategory" class="no-category-prompt">
+          <div class="flex-1">
+            <div *ngIf="!selectedCategory" class="py-20 text-center text-sm font-semibold text-textMuted flex flex-col items-center gap-2">
+              <span class="text-3xl">📁</span>
               Please select an active category from the left pane to view services.
             </div>
 
-            <div *ngIf="selectedCategory" class="services-list-container">
+            <div *ngIf="selectedCategory" class="flex flex-col gap-4">
               <div
                 *ngFor="let svc of selectedCategory.services"
-                class="service-item"
-                [class.inactive]="!svc.isActive"
+                class="p-4 rounded-2xl border border-border bg-bgSoft/20 hover:border-primary/20 hover:shadow-md transition-all duration-300 flex justify-between items-start gap-4 flex-wrap sm:flex-nowrap group"
+                [ngClass]="!svc.isActive ? 'opacity-55' : ''"
               >
-                <div class="svc-details">
-                  <div class="svc-header-row">
-                    <span class="svc-name">{{ svc.name }}</span>
-                    <span class="badge badge-accent">₹{{ svc.basePrice }} Base</span>
+                <div class="flex flex-col gap-2 flex-1 min-w-0">
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm font-black text-textMain truncate">{{ svc.name }}</span>
+                    <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase bg-success/15 text-success border border-success/20">₹{{ svc.basePrice }} Base</span>
                   </div>
-                  <p class="svc-description">{{ svc.description || 'No description provided.' }}</p>
+                  <p class="text-xs text-textMuted leading-relaxed pr-2">{{ svc.description || 'No description provided.' }}</p>
                   
-                  <div class="svc-meta-row">
-                    <span>⏱️ {{ svc.duration }} min</span>
-                    <span>📍 Radius: {{ svc.searchRadiusKm || 10 }} km</span>
-                    <span *ngIf="svc.pricePerKm">🚗 ₹{{ svc.pricePerKm }}/km</span>
-                    <span class="badge badge-primary" *ngFor="let skill of svc.requiredSkills">{{ skill }}</span>
+                  <div class="flex gap-2.5 items-center flex-wrap text-[10px] font-bold text-textSubtle mt-1.5">
+                    <span class="flex items-center gap-1 bg-bgCard px-2 py-1 rounded-lg border border-border">⏱️ {{ svc.duration }} min</span>
+                    <span class="flex items-center gap-1 bg-bgCard px-2 py-1 rounded-lg border border-border">📍 Radius: {{ svc.searchRadiusKm || 10 }} km</span>
+                    <span *ngIf="svc.pricePerKm" class="flex items-center gap-1 bg-bgCard px-2 py-1 rounded-lg border border-border">🚗 ₹{{ svc.pricePerKm }}/km</span>
+                    <span class="px-2 py-1 rounded-lg border border-primary/25 bg-primary/10 text-primary font-black uppercase" *ngFor="let skill of svc.requiredSkills">{{ skill }}</span>
                   </div>
                 </div>
 
-                <div class="svc-actions">
-                  <button (click)="openServiceModal(svc)" class="btn btn-secondary btn-small">✏️ Edit</button>
-                  <button *ngIf="svc.isActive" (click)="deleteService(svc)" class="btn btn-danger btn-small">🗑️ Deactivate</button>
-                  <span *ngIf="!svc.isActive" class="badge badge-muted">Deactivated</span>
+                <div class="flex flex-col sm:items-end gap-2.5 flex-shrink-0 self-center">
+                  <div class="flex items-center gap-2">
+                    <button (click)="openServiceModal(svc)" 
+                            class="px-3 py-1.5 rounded-xl border border-border bg-bgCard text-textMain text-xs font-bold transition-all hover:bg-bgSoft hover:border-borderStrong active:scale-95 shadow-sm">✏️ Edit</button>
+                    <button *ngIf="svc.isActive" (click)="deleteService(svc)" 
+                            class="px-3 py-1.5 rounded-xl border border-danger/20 bg-danger/5 text-danger text-xs font-bold transition-all hover:bg-danger/10 hover:border-danger/40 active:scale-95 shadow-sm">Deactivate</button>
+                  </div>
+                  <span *ngIf="!svc.isActive" class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-borderStrong/20 text-textSubtle border border-borderStrong text-center">Deactivated</span>
                 </div>
               </div>
 
-              <div *ngIf="selectedCategory.services?.length === 0" class="no-data">
+              <div *ngIf="selectedCategory.services?.length === 0" class="py-20 text-center text-xs font-bold text-textSubtle flex flex-col items-center gap-2">
+                <span class="text-3xl">📭</span>
                 No services defined in this category.
               </div>
             </div>
@@ -102,300 +124,125 @@ import { AdminService } from '../../core/services/admin.service';
       </div>
 
       <!-- Category Modal -->
-      <div class="modal-overlay" *ngIf="showCategoryModal" (click)="closeCategoryModal()">
-        <div class="glass-panel modal-content" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h3>{{ editingCategory ? 'Edit Category' : 'Create Category' }}</h3>
-            <button class="modal-close" (click)="closeCategoryModal()">×</button>
+      <div class="fixed inset-0 flex items-center justify-center z-50 p-6 bg-black/60 backdrop-blur-md animate-fade-in" 
+           *ngIf="showCategoryModal" (click)="closeCategoryModal()">
+        <div class="w-full max-w-md rounded-3xl border border-border bg-bgCard flex flex-col gap-5 p-6 animate-scale-in shadow-2xl" 
+             (click)="$event.stopPropagation()">
+          <div class="flex items-center justify-between pb-4 border-b border-border">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base bg-primary/10 text-primary">📁</div>
+              <h3 class="text-base font-black text-textMain">{{ editingCategory ? 'Edit Category' : 'Create Category' }}</h3>
+            </div>
+            <button class="w-8 h-8 rounded-xl border border-border bg-bgSoft text-textMuted flex items-center justify-center font-bold text-sm hover:bg-bgSoft/75 active:scale-95 transition-all" 
+                    (click)="closeCategoryModal()">✕</button>
           </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label class="form-label" for="catName">Category Name</label>
-              <input type="text" id="catName" class="form-control" [(ngModel)]="catName" placeholder="Plumbing" />
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="catName">Category Name</label>
+              <input type="text" id="catName" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="catName" placeholder="Plumbing" />
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="catIcon">Icon emoji</label>
-              <input type="text" id="catIcon" class="form-control" [(ngModel)]="catIcon" placeholder="🔧" />
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="catIcon">Icon emoji</label>
+              <input type="text" id="catIcon" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="catIcon" placeholder="🔧" />
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="catDesc">Description</label>
-              <textarea id="catDesc" class="form-control" [(ngModel)]="catDesc" rows="3"></textarea>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="catDesc">Description</label>
+              <textarea id="catDesc" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="catDesc" rows="3"></textarea>
             </div>
 
-            <div class="form-group row-group" *ngIf="editingCategory">
-              <label class="form-label">Active Listing Status</label>
-              <label class="switch">
-                <input type="checkbox" [(ngModel)]="catActive" />
-                <span class="slider"></span>
+            <div class="flex justify-between items-center border-t border-b border-border py-3.5 mt-2" *ngIf="editingCategory">
+              <span class="text-xs font-bold text-textMain">Active Listing Status</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" [(ngModel)]="catActive" class="sr-only peer" />
+                <div class="w-10 h-5.5 bg-borderStrong/35 rounded-full peer peer-checked:bg-primary transition-colors duration-200 relative">
+                  <div class="absolute top-[3px] left-[3px] w-[16px] h-[16px] rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-4.5"></div>
+                </div>
               </label>
             </div>
 
-            <div class="modal-actions">
-              <button class="btn btn-secondary" (click)="closeCategoryModal()">Cancel</button>
-              <button class="btn btn-primary" (click)="saveCategory()">Save Category</button>
+            <div class="flex justify-end gap-3 pt-2">
+              <button class="px-5 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-bold hover:bg-bgSoft/75 active:scale-95 transition-all" (click)="closeCategoryModal()">Cancel</button>
+              <button class="px-5 py-2.5 rounded-xl text-xs font-black text-white bg-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95" (click)="saveCategory()">Save Category</button>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Service Modal -->
-      <div class="modal-overlay" *ngIf="showServiceModal" (click)="closeServiceModal()">
-        <div class="glass-panel modal-content" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h3>{{ editingService ? 'Edit Service' : 'Create Service' }}</h3>
-            <button class="modal-close" (click)="closeServiceModal()">×</button>
+      <div class="fixed inset-0 flex items-center justify-center z-50 p-6 bg-black/60 backdrop-blur-md animate-fade-in" 
+           *ngIf="showServiceModal" (click)="closeServiceModal()">
+        <div class="w-full max-w-lg rounded-3xl border border-border bg-bgCard flex flex-col gap-5 p-6 animate-scale-in shadow-2xl" 
+             (click)="$event.stopPropagation()">
+          <div class="flex items-center justify-between pb-4 border-b border-border">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base bg-primary/10 text-primary">⚙️</div>
+              <h3 class="text-base font-black text-textMain">{{ editingService ? 'Edit Service' : 'Create Service' }}</h3>
+            </div>
+            <button class="w-8 h-8 rounded-xl border border-border bg-bgSoft text-textMuted flex items-center justify-center font-bold text-sm hover:bg-bgSoft/75 active:scale-95 transition-all" 
+                    (click)="closeServiceModal()">✕</button>
           </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label class="form-label" for="svcName">Service Name</label>
-              <input type="text" id="svcName" class="form-control" [(ngModel)]="svcName" placeholder="Leak Repair" />
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcName">Service Name</label>
+              <input type="text" id="svcName" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcName" placeholder="Leak Repair" />
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="svcDesc">Description</label>
-              <textarea id="svcDesc" class="form-control" [(ngModel)]="svcDesc" rows="2"></textarea>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcDesc">Description</label>
+              <textarea id="svcDesc" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcDesc" rows="2"></textarea>
             </div>
 
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label" for="svcPrice">Base Price (₹)</label>
-                <input type="number" id="svcPrice" class="form-control" [(ngModel)]="svcPrice" />
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcPrice">Base Price (₹)</label>
+                <input type="number" id="svcPrice" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcPrice" />
               </div>
-              <div class="form-group">
-                <label class="form-label" for="svcDuration">Duration (min)</label>
-                <input type="number" id="svcDuration" class="form-control" [(ngModel)]="svcDuration" />
-              </div>
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label" for="svcRadius">Search Radius (km)</label>
-                <input type="number" id="svcRadius" class="form-control" [(ngModel)]="svcRadius" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="svcPerKm">Price Per km (₹)</label>
-                <input type="number" id="svcPerKm" class="form-control" [(ngModel)]="svcPerKm" />
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcDuration">Duration (min)</label>
+                <input type="number" id="svcDuration" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcDuration" />
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="svcSkills">Required Skills (comma separated)</label>
-              <input type="text" id="svcSkills" class="form-control" [(ngModel)]="svcSkills" placeholder="plumbing, welding" />
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcRadius">Search Radius (km)</label>
+                <input type="number" id="svcRadius" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcRadius" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcPerKm">Price Per km (₹)</label>
+                <input type="number" id="svcPerKm" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcPerKm" />
+              </div>
             </div>
 
-            <div class="form-group row-group" *ngIf="editingService">
-              <label class="form-label">Active Listing Status</label>
-              <label class="switch">
-                <input type="checkbox" [(ngModel)]="svcActive" />
-                <span class="slider"></span>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcSkills">Required Skills (comma separated)</label>
+              <input type="text" id="svcSkills" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcSkills" placeholder="plumbing, welding" />
+            </div>
+
+            <div class="flex justify-between items-center border-t border-b border-border py-3.5 mt-2" *ngIf="editingService">
+              <span class="text-xs font-bold text-textMain">Active Listing Status</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" [(ngModel)]="svcActive" class="sr-only peer" />
+                <div class="w-10 h-5.5 bg-borderStrong/35 rounded-full peer peer-checked:bg-primary transition-colors duration-200 relative">
+                  <div class="absolute top-[3px] left-[3px] w-[16px] h-[16px] rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-4.5"></div>
+                </div>
               </label>
             </div>
 
-            <div class="modal-actions">
-              <button class="btn btn-secondary" (click)="closeServiceModal()">Cancel</button>
-              <button class="btn btn-primary" (click)="saveService()">Save Service</button>
+            <div class="flex justify-end gap-3 pt-2">
+              <button class="px-5 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-bold hover:bg-bgSoft/75 active:scale-95 transition-all" (click)="closeServiceModal()">Cancel</button>
+              <button class="px-5 py-2.5 rounded-xl text-xs font-black text-white bg-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95" (click)="saveService()">Save Service</button>
             </div>
           </div>
         </div>
       </div>
     </div>
   `,
-  styles: [`
-    .catalog-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    .page-header h1 {
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-    .page-header p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-top: 4px;
-    }
-    .catalog-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: 24px;
-      align-items: start;
-    }
-    @media (max-width: 991px) {
-      .catalog-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .pane-card {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      min-height: 450px;
-    }
-    .pane-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
-    }
-    .pane-header h3 {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-    .pane-body {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .cat-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: var(--transition-smooth);
-      background: rgba(255, 255, 255, 0.01);
-    }
-    .cat-item:hover {
-      background: rgba(255, 255, 255, 0.03);
-      border-color: rgba(99, 102, 241, 0.2);
-    }
-    .cat-item.active {
-      background: rgba(99, 102, 241, 0.08);
-      border-color: var(--primary);
-    }
-    .cat-item.inactive {
-      opacity: 0.5;
-    }
-    .cat-details {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .cat-icon {
-      font-size: 1.5rem;
-    }
-    .cat-meta {
-      display: flex;
-      flex-direction: column;
-    }
-    .cat-name {
-      font-weight: 500;
-      color: var(--text-main);
-    }
-    .cat-services-count {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    .cat-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .action-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      padding: 4px;
-      border-radius: 4px;
-      transition: var(--transition-smooth);
-    }
-    .action-btn:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .action-btn.delete:hover {
-      background: rgba(244, 63, 94, 0.1);
-    }
-    .no-data, .no-category-prompt {
-      text-align: center;
-      padding: 40px 0;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
-    .services-list-container {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .service-item {
-      padding: 16px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.01);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-    }
-    .service-item.inactive {
-      opacity: 0.55;
-    }
-    .svc-details {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-    }
-    .svc-header-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .svc-name {
-      font-weight: 600;
-      color: var(--text-main);
-      font-size: 1.05rem;
-    }
-    .svc-description {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
-    .svc-meta-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .svc-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .row-group {
-      flex-direction: row !important;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 0;
-      margin-top: 10px;
-    }
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 24px;
-    }
-  `]
+  styles: []
 })
-export class CatalogComponent {
+export class CatalogComponent implements OnInit {
   private adminService = inject(AdminService);
 
   categories: any[] = [];

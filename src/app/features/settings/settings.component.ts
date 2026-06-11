@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
@@ -8,16 +8,23 @@ import { AdminService } from '../../core/services/admin.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="settings-wrapper animate-fade-in">
-      <div class="page-header">
-        <h1>System Settings</h1>
-        <p>Configure platform-wide variables and parameters</p>
+    <div class="flex flex-col gap-6 animate-fade-in max-w-xl">
+
+      <!-- ─── Page Header ──────────────────────────────────── -->
+      <div class="animate-slide-up">
+        <div class="flex items-center gap-3 mb-1.5">
+          <div class="w-1.5 h-7 rounded-full bg-gradient-to-b from-primary to-accent"></div>
+          <h1 class="text-2xl font-black tracking-tight text-textMain">System Settings</h1>
+        </div>
+        <p class="text-sm pl-5 text-textMuted">Configure platform-wide variables and parameters</p>
       </div>
 
-      <div class="glass-panel form-card">
-        <form (ngSubmit)="saveSettings()" #settingsForm="ngForm">
-          <div class="form-group">
-            <label for="commissionRate">Platform Commission Rate (%)</label>
+      <!-- ─── Form Card ─────────────────────────────────────── -->
+      <div class="p-6 rounded-3xl border border-border bg-bgCard shadow-sm animate-slide-up [animation-delay:60ms]">
+        <form (ngSubmit)="saveSettings()" #settingsForm="ngForm" class="flex flex-col gap-5">
+          
+          <div class="flex flex-col gap-1.5">
+            <label for="commissionRate" class="text-xs font-black uppercase tracking-wider text-textMuted">Platform Commission Rate (%)</label>
             <input 
               type="number" 
               id="commissionRate" 
@@ -26,13 +33,13 @@ import { AdminService } from '../../core/services/admin.service';
               required 
               min="0" 
               max="100" 
-              class="form-control"
+              class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-sm font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
             />
-            <small class="form-text text-muted">The percentage of the booking fee taken by the platform.</small>
+            <span class="text-[10px] text-textSubtle font-medium pl-1">The percentage of the booking fee taken by the platform.</span>
           </div>
 
-          <div class="form-group">
-            <label for="defaultSearchRadiusKm">Default Search Radius (km)</label>
+          <div class="flex flex-col gap-1.5">
+            <label for="defaultSearchRadiusKm" class="text-xs font-black uppercase tracking-wider text-textMuted">Default Search Radius (km)</label>
             <input 
               type="number" 
               id="defaultSearchRadiusKm" 
@@ -41,13 +48,13 @@ import { AdminService } from '../../core/services/admin.service';
               required 
               min="1" 
               max="50" 
-              class="form-control"
+              class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-sm font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
             />
-            <small class="form-text text-muted">Radius in kilometers within which candidate providers are matched.</small>
+            <span class="text-[10px] text-textSubtle font-medium pl-1">Radius in kilometers within which candidate providers are matched.</span>
           </div>
 
-          <div class="form-group">
-            <label for="bookingExpiryMinutes">Booking Expiry Timeout (minutes)</label>
+          <div class="flex flex-col gap-1.5">
+            <label for="bookingExpiryMinutes" class="text-xs font-black uppercase tracking-wider text-textMuted">Booking Expiry Timeout (minutes)</label>
             <input 
               type="number" 
               id="bookingExpiryMinutes" 
@@ -56,122 +63,32 @@ import { AdminService } from '../../core/services/admin.service';
               required 
               min="1" 
               max="60" 
-              class="form-control"
+              class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-sm font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
             />
-            <small class="form-text text-muted">How long a provider has to confirm a booking before it auto-expires.</small>
+            <span class="text-[10px] text-textSubtle font-medium pl-1">How long a provider has to confirm a booking before it auto-expires.</span>
           </div>
 
-          <div class="form-actions">
-            <button type="submit" [disabled]="!settingsForm.valid || saving" class="btn btn-primary">
+          <div class="flex justify-end pt-3 border-t border-border mt-2">
+            <button type="submit" 
+                    [disabled]="!settingsForm.valid || saving" 
+                    class="px-6 py-2.5 rounded-xl text-xs font-black text-white bg-primary hover:bg-primary-hover shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
               {{ saving ? 'Saving Changes...' : 'Save Settings' }}
             </button>
           </div>
         </form>
 
-        <div *ngIf="successMessage" class="alert alert-success animate-fade-in">
-          {{ successMessage }}
+        <div *ngIf="successMessage" class="mt-4 p-4 rounded-xl border border-success/20 bg-success/5 text-success text-xs font-bold animate-fade-in flex items-center gap-2">
+          <span>✅</span> {{ successMessage }}
         </div>
-        <div *ngIf="errorMessage" class="alert alert-danger animate-fade-in">
-          {{ errorMessage }}
+        <div *ngIf="errorMessage" class="mt-4 p-4 rounded-xl border border-danger/20 bg-danger/5 text-danger text-xs font-bold animate-fade-in flex items-center gap-2">
+          <span>⚠️</span> {{ errorMessage }}
         </div>
       </div>
     </div>
   `,
-  styles: [`
-    .settings-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      max-width: 600px;
-    }
-    .page-header h1 {
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-    .page-header p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-top: 4px;
-    }
-    .form-card {
-      padding: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-    label {
-      color: var(--text-main);
-      font-weight: 500;
-      font-size: 0.95rem;
-    }
-    .form-control {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      color: var(--text-main);
-      font-size: 1rem;
-      transition: var(--transition-smooth);
-    }
-    .form-control:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .form-text {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-    .btn {
-      padding: 12px 24px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: var(--transition-smooth);
-      border: none;
-    }
-    .btn-primary {
-      background: var(--primary);
-      color: var(--text-main);
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: #4f46e5;
-    }
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .alert {
-      padding: 16px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      margin-top: 16px;
-    }
-    .alert-success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      color: #34d399;
-    }
-    .alert-danger {
-      background: rgba(244, 63, 94, 0.1);
-      border: 1px solid rgba(244, 63, 94, 0.2);
-      color: #f43f5e;
-    }
-  `]
+  styles: []
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
   private adminService = inject(AdminService);
 
   settings = {
