@@ -165,4 +165,25 @@ export class AdminService {
     if (rejectionReason) body.rejectionReason = rejectionReason;
     return this.http.patch<any>(`${this.apiUrl}/admin/providers/${userId}/kyc`, body);
   }
+
+  // ── SETTLEMENT MANAGEMENT ─────────────────────────────────────
+  getSettlements(filters: any = {}): Observable<any> {
+    let params = new HttpParams();
+    if (filters.page) params = params.set('page', filters.page.toString());
+    if (filters.limit) params = params.set('limit', filters.limit.toString());
+    if (filters.sort) params = params.set('sort', filters.sort);
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.providerId) params = params.set('providerId', filters.providerId);
+    return this.http.get<any>(`${this.apiUrl}/admin/settlements`, { params });
+  }
+
+  getSettlementById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admin/settlements/${id}`);
+  }
+
+  updateSettlementStatus(id: string, status: string, adminNote?: string): Observable<any> {
+    const body: any = { status };
+    if (adminNote) body.adminNote = adminNote;
+    return this.http.patch<any>(`${this.apiUrl}/admin/settlements/${id}/status`, body);
+  }
 }

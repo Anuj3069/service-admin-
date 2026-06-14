@@ -11,6 +11,7 @@ import { PaymentReconcilerComponent } from './features/payments/payment-reconcil
 import { ReviewModeratorComponent } from './features/reviews/review-moderator.component';
 import { AnalyticsComponent } from './features/analytics/analytics.component';
 import { SettingsComponent } from './features/settings/settings.component';
+import { SettlementManagerComponent } from './features/settlements/settlement-manager.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -26,6 +27,7 @@ export const routes: Routes = [
       { path: 'catalog', component: CatalogComponent },
       { path: 'bookings', component: BookingMonitorComponent },
       { path: 'payments', component: PaymentReconcilerComponent },
+      { path: 'settlements', component: SettlementManagerComponent },
       { path: 'reviews', component: ReviewModeratorComponent },
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'settings', component: SettingsComponent }

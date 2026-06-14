@@ -264,7 +264,7 @@ import { AdminService } from '../../core/services/admin.service';
             <!-- Cancellation note if present -->
             <div *ngIf="selectedBooking.cancellationReason"
                  class="p-4 rounded-xl border border-danger/20 bg-danger/5 text-textMain">
-              <div class="text-[9px] font-black uppercase tracking-widest mb-1.5 text-danger">⚠️ Cancellation Reason</div>
+              <div class="text-[9px] font-black uppercase tracking-widest mb-1.5 text-danger">{{ isCustomerCancellation(selectedBooking) ? 'Customer Cancellation' : 'Admin Cancellation' }}</div>
               <div class="text-xs font-semibold">{{ selectedBooking.cancellationReason }}</div>
               <div class="text-[10px] mt-1 text-textMuted" *ngIf="selectedBooking.cancelledAt">
                 Cancelled: {{ selectedBooking.cancelledAt | date:'dd MMM yyyy, HH:mm' }}
@@ -356,12 +356,13 @@ export class BookingMonitorComponent implements OnInit {
   cancellationReason = '';
 
   statusChips = [
-    { value: '', label: 'All',       icon: '📋', activeClass: 'bg-primary/10 border-primary/30 text-primary shadow-sm shadow-primary/5' },
-    { value: 'requested',  label: 'Requested',  icon: '🔄', activeClass: 'bg-warning/10 border-warning/30 text-warning shadow-sm shadow-warning/5' },
-    { value: 'accepted',   label: 'Active',     icon: '⚡', activeClass: 'bg-accent/10 border-accent/30 text-accent shadow-sm shadow-accent/5' },
-    { value: 'completed',  label: 'Completed',  icon: '✅', activeClass: 'bg-success/10 border-success/30 text-success shadow-sm shadow-success/5' },
-    { value: 'cancelled',  label: 'Cancelled',  icon: '❌', activeClass: 'bg-danger/10 border-danger/30 text-danger shadow-sm shadow-danger/5' },
-    { value: 'expired',    label: 'Expired',    icon: '⏳', activeClass: 'bg-borderStrong/20 border-borderStrong text-textSubtle shadow-sm' },
+    { value: '', label: 'All', icon: 'All', activeClass: 'bg-primary/10 border-primary/30 text-primary shadow-sm shadow-primary/5' },
+    { value: 'requested', label: 'Requested', icon: 'Req', activeClass: 'bg-warning/10 border-warning/30 text-warning shadow-sm shadow-warning/5' },
+    { value: 'pending', label: 'Pending', icon: 'Pend', activeClass: 'bg-primary/10 border-primary/30 text-primary shadow-sm shadow-primary/5' },
+    { value: 'accepted', label: 'Active', icon: 'Act', activeClass: 'bg-accent/10 border-accent/30 text-accent shadow-sm shadow-accent/5' },
+    { value: 'completed', label: 'Completed', icon: 'Done', activeClass: 'bg-success/10 border-success/30 text-success shadow-sm shadow-success/5' },
+    { value: 'cancelled', label: 'Cancelled', icon: 'X', activeClass: 'bg-danger/10 border-danger/30 text-danger shadow-sm shadow-danger/5' },
+    { value: 'expired', label: 'Expired', icon: 'Exp', activeClass: 'bg-borderStrong/20 border-borderStrong text-textSubtle shadow-sm' },
   ];
 
   ngOnInit() { this.loadBookings(); }
@@ -410,6 +411,10 @@ export class BookingMonitorComponent implements OnInit {
     return !['cancelled', 'completed', 'expired'].includes(status);
   }
 
+  isCustomerCancellation(booking: any): boolean {
+    return (booking?.cancellationReason || '').toLowerCase().includes('customer');
+  }
+
   openDetailsModal(id: string) {
     this.adminService.getBookingDetails(id).subscribe({
       next: (res) => { this.selectedBooking = res.data?.booking; this.showDetailsModal = true; },
@@ -436,3 +441,4 @@ export class BookingMonitorComponent implements OnInit {
     });
   }
 }
+

@@ -226,6 +226,7 @@ export class AdminLayoutComponent implements OnInit {
     { icon: '🗂️', label: 'Catalog',    path: 'catalog' },
     { icon: '📅', label: 'Bookings',   path: 'bookings' },
     { icon: '💳', label: 'Payments',   path: 'payments' },
+    { icon: '💰', label: 'Settlements', path: 'settlements' },
     { icon: '⭐', label: 'Reviews',    path: 'reviews' },
     { icon: '⚙️', label: 'Settings',   path: 'settings' },
   ];
@@ -238,6 +239,7 @@ export class AdminLayoutComponent implements OnInit {
     catalog: 'Service Catalog',
     bookings: 'Booking Monitor',
     payments: 'Payments',
+    settlements: 'Settlements',
     reviews: 'Review Moderator',
     settings: 'Settings',
   };
@@ -264,6 +266,7 @@ export class AdminLayoutComponent implements OnInit {
       catalog:    'background: rgba(168,85,247,0.12); color: #a855f7',
       bookings:   'background: rgba(239,68,68,0.12); color: #ef4444',
       payments:   'background: rgba(34,197,94,0.12); color: #22c55e',
+      settlements:'background: rgba(16,185,129,0.12); color: #10b981',
       reviews:    'background: rgba(251,191,36,0.12); color: #fbbf24',
       settings:   'background: rgba(148,163,184,0.12); color: #94a3b8',
     };
