@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/login/login.component';
+import { ForgotPasswordComponent } from './features/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/reset-password/reset-password.component';
 import { AdminLayoutComponent } from './features/layout/admin-layout.component';
 import { adminGuard } from './core/guards/admin.guard';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
@@ -15,6 +17,8 @@ import { SettlementManagerComponent } from './features/settlements/settlement-ma
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   {
     path: 'admin',
     component: AdminLayoutComponent,

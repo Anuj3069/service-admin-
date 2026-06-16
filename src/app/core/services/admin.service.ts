@@ -42,6 +42,18 @@ export class AdminService {
     return this.http.post<any>(`${this.apiUrl}/auth/login`, credentials);
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/reset-password`, { token, password });
+  }
+
+  refreshToken(token: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/refresh-token`, { refreshToken: token });
+  }
+
   // ── USER MANAGEMENT ──────────────────────────────────────────
   getUsers(filters: any = {}): Observable<any> {
     let params = new HttpParams();
