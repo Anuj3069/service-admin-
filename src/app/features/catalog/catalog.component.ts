@@ -92,6 +92,7 @@ import { AdminService } from '../../core/services/admin.service';
                   <div class="flex items-center gap-3">
                     <span class="text-sm font-black text-textMain truncate">{{ svc.name }}</span>
                     <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase bg-success/15 text-success border border-success/20">₹{{ svc.basePrice }} Base</span>
+                    <span *ngIf="svc.allowMonthBooking && svc.monthBasePrice" class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase bg-accent/15 text-accent border border-accent/20">₹{{ svc.monthBasePrice }} Monthly</span>
                   </div>
                   <p class="text-xs text-textMuted leading-relaxed pr-2">{{ svc.description || 'No description provided.' }}</p>
                   
@@ -213,6 +214,12 @@ import { AdminService } from '../../core/services/admin.service';
               </div>
             </div>
 
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcMonthPrice">Monthly Base Price — 9h (₹)</label>
+              <input type="number" id="svcMonthPrice" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcMonthPrice" placeholder="Leave empty if monthly booking is disabled" />
+              <span class="text-[10px] text-textMuted">Full-day (16h) will be charged at 2×. Only applies when Monthly Booking is enabled for this service.</span>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
                 <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcRadius">Search Radius (km)</label>
@@ -270,6 +277,7 @@ export class CatalogComponent implements OnInit {
   svcName = '';
   svcDesc = '';
   svcPrice = 0;
+  svcMonthPrice: number | null = null;
   svcDuration = 30;
   svcRadius = 10;
   svcPerKm = 0;
@@ -368,6 +376,7 @@ export class CatalogComponent implements OnInit {
       this.svcName = svc.name;
       this.svcDesc = svc.description || '';
       this.svcPrice = svc.basePrice;
+      this.svcMonthPrice = svc.monthBasePrice ?? null;
       this.svcDuration = svc.duration;
       this.svcRadius = svc.searchRadiusKm || 10;
       this.svcPerKm = svc.pricePerKm || 0;
@@ -377,6 +386,7 @@ export class CatalogComponent implements OnInit {
       this.svcName = '';
       this.svcDesc = '';
       this.svcPrice = 0;
+      this.svcMonthPrice = null;
       this.svcDuration = 30;
       this.svcRadius = 10;
       this.svcPerKm = 0;
@@ -394,7 +404,7 @@ export class CatalogComponent implements OnInit {
   saveService() {
     if (!this.selectedCategory) return;
 
-    const payload = {
+    const payload: any = {
       name: this.svcName,
       category: this.selectedCategory._id,
       description: this.svcDesc,
@@ -403,7 +413,8 @@ export class CatalogComponent implements OnInit {
       searchRadiusKm: this.svcRadius,
       pricePerKm: this.svcPerKm,
       requiredSkills: this.svcSkills.split(',').map(s => s.trim().toLowerCase()).filter(s => s !== ''),
-      isActive: this.svcActive
+      isActive: this.svcActive,
+      ...(this.svcMonthPrice !== null && { monthBasePrice: this.svcMonthPrice }),
     };
 
     if (this.editingService) {
