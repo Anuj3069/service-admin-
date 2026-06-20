@@ -110,7 +110,7 @@ import { AdminService } from '../../core/services/admin.service';
                     <button *ngIf="svc.isActive" (click)="deleteService(svc)"
                             class="px-3 py-1.5 rounded-xl border border-danger/20 bg-danger/5 text-danger text-xs font-bold transition-all hover:bg-danger/10 hover:border-danger/40 active:scale-95 shadow-sm">Deactivate</button>
                   </div>
-                  <button *ngIf="svc.isActive" (click)="toggleMonthBooking(svc)"
+                  <button (click)="toggleMonthBooking(svc)"
                           class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all active:scale-95 shadow-sm"
                           [ngClass]="svc.allowMonthBooking
                             ? 'border-accent/30 bg-accent/10 text-accent hover:bg-accent/20'
