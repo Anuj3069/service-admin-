@@ -105,11 +105,19 @@ import { AdminService } from '../../core/services/admin.service';
 
                 <div class="flex flex-col sm:items-end gap-2.5 flex-shrink-0 self-center">
                   <div class="flex items-center gap-2">
-                    <button (click)="openServiceModal(svc)" 
+                    <button (click)="openServiceModal(svc)"
                             class="px-3 py-1.5 rounded-xl border border-border bg-bgCard text-textMain text-xs font-bold transition-all hover:bg-bgSoft hover:border-borderStrong active:scale-95 shadow-sm">✏️ Edit</button>
-                    <button *ngIf="svc.isActive" (click)="deleteService(svc)" 
+                    <button *ngIf="svc.isActive" (click)="deleteService(svc)"
                             class="px-3 py-1.5 rounded-xl border border-danger/20 bg-danger/5 text-danger text-xs font-bold transition-all hover:bg-danger/10 hover:border-danger/40 active:scale-95 shadow-sm">Deactivate</button>
                   </div>
+                  <button *ngIf="svc.isActive" (click)="toggleMonthBooking(svc)"
+                          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all active:scale-95 shadow-sm"
+                          [ngClass]="svc.allowMonthBooking
+                            ? 'border-accent/30 bg-accent/10 text-accent hover:bg-accent/20'
+                            : 'border-border bg-bgCard text-textMuted hover:border-borderStrong hover:text-textMain'">
+                    <span>📅</span>
+                    <span>{{ svc.allowMonthBooking ? 'Monthly ON' : 'Monthly OFF' }}</span>
+                  </button>
                   <span *ngIf="!svc.isActive" class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-borderStrong/20 text-textSubtle border border-borderStrong text-center">Deactivated</span>
                 </div>
               </div>
@@ -424,5 +432,15 @@ export class CatalogComponent implements OnInit {
         error: (err) => console.error(err)
       });
     }
+  }
+
+  toggleMonthBooking(svc: any) {
+    const next = !svc.allowMonthBooking;
+    this.adminService.toggleMonthBooking(svc._id, next).subscribe({
+      next: () => {
+        svc.allowMonthBooking = next;
+      },
+      error: (err) => console.error('toggleMonthBooking error:', err)
+    });
   }
 }

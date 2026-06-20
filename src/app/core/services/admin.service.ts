@@ -178,6 +178,11 @@ export class AdminService {
     return this.http.patch<any>(`${this.apiUrl}/admin/providers/${userId}/kyc`, body);
   }
 
+  // ── MONTH BOOKING TOGGLE ─────────────────────────────────────
+  toggleMonthBooking(id: string, allowMonthBooking: boolean): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/admin/services/${id}/month-booking`, { allowMonthBooking });
+  }
+
   // ── SETTLEMENT MANAGEMENT ─────────────────────────────────────
   getSettlements(filters: any = {}): Observable<any> {
     let params = new HttpParams();
