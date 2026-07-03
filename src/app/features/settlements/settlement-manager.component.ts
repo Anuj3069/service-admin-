@@ -77,6 +77,11 @@ import { AdminService } from '../../core/services/admin.service';
                 <!-- Amount -->
                 <td class="px-6 py-4">
                   <span class="text-sm font-black tabular-nums text-textMain">₹{{ s.totalAmount }}</span>
+                  <div *ngIf="s.cashCommissionDeducted > 0"
+                       class="text-[10px] mt-0.5 font-semibold"
+                       style="color:#f59e0b">
+                    −₹{{ s.cashCommissionDeducted }} cash
+                  </div>
                 </td>
 
                 <!-- Jobs count -->
@@ -84,6 +89,10 @@ import { AdminService } from '../../core/services/admin.service';
                   <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-bgSoft text-textMain border border-border">
                     {{ s.bookingIds?.length || 0 }} jobs
                   </span>
+                  <div *ngIf="(s.cashCommissionIds?.length || 0) > 0"
+                       class="text-[10px] mt-0.5" style="color:var(--text-muted)">
+                    +{{ s.cashCommissionIds.length }} cash netted
+                  </div>
                 </td>
 
                 <!-- Status badge -->
@@ -192,17 +201,68 @@ import { AdminService } from '../../core/services/admin.service';
 
           <div *ngIf="selectedSettlement" class="p-6 flex flex-col gap-5 overflow-y-auto">
 
-            <!-- Status + Amount row -->
-            <div class="grid grid-cols-2 gap-4">
-              <div class="p-4 rounded-xl border border-border bg-bgSoft flex flex-col gap-2">
-                <span class="text-[9px] font-black uppercase tracking-widest text-textSubtle">Status</span>
-                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase w-fit border"
-                      [ngClass]="getStatusClass(selectedSettlement.status)">{{ selectedSettlement.status }}</span>
+            <!-- Status row -->
+            <div class="p-4 rounded-xl border border-border bg-bgSoft flex flex-col gap-2">
+              <span class="text-[9px] font-black uppercase tracking-widest text-textSubtle">Status</span>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase w-fit border"
+                    [ngClass]="getStatusClass(selectedSettlement.status)">{{ selectedSettlement.status }}</span>
+            </div>
+
+            <!-- Payout Breakdown -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="text-[9px] font-black uppercase tracking-widest text-textSubtle">💵 Payout Breakdown</span>
+                <div class="flex-1 h-px bg-border"></div>
               </div>
-              <div class="p-4 rounded-xl border border-border bg-bgSoft flex flex-col gap-2">
-                <span class="text-[9px] font-black uppercase tracking-widest text-textSubtle">Total Payout</span>
-                <span class="text-xl font-black text-success">₹{{ selectedSettlement.totalAmount }}</span>
+              <div class="rounded-xl border border-border overflow-hidden">
+
+                <!-- Online earnings row -->
+                <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                    <span class="text-xs font-semibold" style="color:var(--text-main)">Online earnings</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-bgSoft border border-border" style="color:var(--text-muted)">
+                      {{ selectedSettlement.bookingIds?.length || 0 }} booking(s)
+                    </span>
+                  </div>
+                  <span class="text-sm font-black tabular-nums" style="color:var(--text-main)">
+                    ₹{{ (selectedSettlement.totalAmount + (selectedSettlement.cashCommissionDeducted || 0)) | number }}
+                  </span>
+                </div>
+
+                <!-- Cash commission deducted row (only if present) -->
+                <div *ngIf="(selectedSettlement.cashCommissionDeducted || 0) > 0"
+                     class="flex items-center justify-between px-4 py-3 border-b border-border"
+                     style="background:rgba(251,191,36,0.04)">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#f59e0b"></span>
+                    <span class="text-xs font-semibold" style="color:#d97706">Cash commission deducted</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded border"
+                          style="background:rgba(251,191,36,0.08); border-color:rgba(251,191,36,0.3); color:#d97706">
+                      {{ selectedSettlement.cashCommissionIds?.length || 0 }} job(s)
+                    </span>
+                  </div>
+                  <span class="text-sm font-black tabular-nums" style="color:#d97706">
+                    −₹{{ selectedSettlement.cashCommissionDeducted | number }}
+                  </span>
+                </div>
+
+                <!-- Net payout row -->
+                <div class="flex items-center justify-between px-4 py-3" style="background:rgba(16,185,129,0.04)">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#10b981"></span>
+                    <span class="text-xs font-black" style="color:#10b981">Net payout to worker</span>
+                  </div>
+                  <span class="text-xl font-black tabular-nums" style="color:#10b981">
+                    ₹{{ selectedSettlement.totalAmount | number }}
+                  </span>
+                </div>
               </div>
+
+              <p *ngIf="(selectedSettlement.cashCommissionDeducted || 0) > 0"
+                 class="text-[10px] mt-2 px-1" style="color:var(--text-subtle)">
+                The ₹{{ selectedSettlement.cashCommissionDeducted | number }} cash commission was auto-deducted — admin retains this from the total online collection. Transfer only ₹{{ selectedSettlement.totalAmount | number }} to the worker.
+              </p>
             </div>
 
             <!-- Section: Worker Info -->
@@ -360,6 +420,24 @@ import { AdminService } from '../../core/services/admin.service';
           <div class="flex flex-col gap-4">
             <div class="p-3 rounded-xl border border-success/20 bg-success/5 text-xs font-semibold text-textMain">
               Confirm that you have <strong>manually transferred ₹{{ settlingSettlement?.totalAmount }}</strong> to the worker's bank account. Enter the UTR / transaction reference below.
+            </div>
+
+            <!-- Cash breakdown hint in settle modal -->
+            <div *ngIf="(settlingSettlement?.cashCommissionDeducted || 0) > 0"
+                 class="rounded-xl border p-3 text-xs flex flex-col gap-1"
+                 style="background:rgba(251,191,36,0.05); border-color:rgba(251,191,36,0.25)">
+              <div class="flex justify-between">
+                <span style="color:var(--text-muted)">Online earnings</span>
+                <span class="font-bold" style="color:var(--text-main)">₹{{ (settlingSettlement?.totalAmount + settlingSettlement?.cashCommissionDeducted) | number }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span style="color:#d97706">Cash commission retained by admin</span>
+                <span class="font-bold" style="color:#d97706">−₹{{ settlingSettlement?.cashCommissionDeducted | number }}</span>
+              </div>
+              <div class="flex justify-between border-t pt-1 mt-0.5" style="border-color:rgba(251,191,36,0.2)">
+                <span class="font-black" style="color:#10b981">Transfer to worker</span>
+                <span class="font-black" style="color:#10b981">₹{{ settlingSettlement?.totalAmount | number }}</span>
+              </div>
             </div>
 
             <div class="flex flex-col gap-1.5">
