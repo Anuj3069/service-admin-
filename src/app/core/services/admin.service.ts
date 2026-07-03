@@ -204,6 +204,24 @@ export class AdminService {
     return this.http.patch<any>(`${this.apiUrl}/admin/settlements/${id}/status`, body);
   }
 
+  // ── WALLET / CASH COMMISSION MANAGEMENT ──────────────────────
+  getCashCommissionSummary(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admin/wallet/cash-commissions/summary`);
+  }
+
+  getCashCommissions(filters: any = {}): Observable<any> {
+    let params = new HttpParams();
+    if (filters.status)     params = params.set('status', filters.status);
+    if (filters.providerId) params = params.set('providerId', filters.providerId);
+    if (filters.page)       params = params.set('page', filters.page.toString());
+    if (filters.limit)      params = params.set('limit', filters.limit.toString());
+    return this.http.get<any>(`${this.apiUrl}/admin/wallet/cash-commissions`, { params });
+  }
+
+  markCommissionCollected(id: string, note?: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/admin/wallet/cash-commissions/${id}/collect`, { note });
+  }
+
   // ── SUPPORT MANAGEMENT ────────────────────────────────────────
   getSupportTickets(filters: any = {}): Observable<any> {
     let params = new HttpParams();

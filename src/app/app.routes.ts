@@ -15,6 +15,7 @@ import { AnalyticsComponent } from './features/analytics/analytics.component';
 import { SettingsComponent } from './features/settings/settings.component';
 import { SettlementManagerComponent } from './features/settlements/settlement-manager.component';
 import { SupportMonitorComponent } from './features/support/support-monitor.component';
+import { WalletComponent } from './features/wallet/wallet.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -33,6 +34,7 @@ export const routes: Routes = [
       { path: 'bookings', component: BookingMonitorComponent },
       { path: 'payments', component: PaymentReconcilerComponent },
       { path: 'settlements', component: SettlementManagerComponent },
+      { path: 'wallet', component: WalletComponent },
       { path: 'reviews', component: ReviewModeratorComponent },
       { path: 'analytics', component: AnalyticsComponent },
       { path: 'support', component: SupportMonitorComponent },
