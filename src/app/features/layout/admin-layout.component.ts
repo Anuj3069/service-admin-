@@ -228,6 +228,7 @@ export class AdminLayoutComponent implements OnInit {
     { icon: '💳', label: 'Payments',   path: 'payments' },
     { icon: '💰', label: 'Settlements', path: 'settlements' },
     { icon: '⭐', label: 'Reviews',    path: 'reviews' },
+    { icon: '🎫', label: 'Support',    path: 'support' },
     { icon: '⚙️', label: 'Settings',   path: 'settings' },
   ];
 
@@ -241,6 +242,7 @@ export class AdminLayoutComponent implements OnInit {
     payments: 'Payments',
     settlements: 'Settlements',
     reviews: 'Review Moderator',
+    support: 'Support Tickets',
     settings: 'Settings',
   };
 
@@ -268,6 +270,7 @@ export class AdminLayoutComponent implements OnInit {
       payments:   'background: rgba(34,197,94,0.12); color: #22c55e',
       settlements:'background: rgba(16,185,129,0.12); color: #10b981',
       reviews:    'background: rgba(251,191,36,0.12); color: #fbbf24',
+      support:    'background: rgba(108,99,255,0.12); color: #6c63ff',
       settings:   'background: rgba(148,163,184,0.12); color: #94a3b8',
     };
     return colorMap[path] || 'background: var(--bg-soft); color: var(--text-muted)';

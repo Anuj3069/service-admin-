@@ -203,4 +203,25 @@ export class AdminService {
     if (adminNote) body.adminNote = adminNote;
     return this.http.patch<any>(`${this.apiUrl}/admin/settlements/${id}/status`, body);
   }
+
+  // ── SUPPORT MANAGEMENT ────────────────────────────────────────
+  getSupportTickets(filters: any = {}): Observable<any> {
+    let params = new HttpParams();
+    if (filters.status) params = params.set('status', filters.status);
+    if (filters.page) params = params.set('page', filters.page.toString());
+    if (filters.limit) params = params.set('limit', filters.limit.toString());
+    return this.http.get<any>(`${this.apiUrl}/admin/support`, { params });
+  }
+
+  getSupportTicket(ticketId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admin/support/${ticketId}`);
+  }
+
+  sendSupportMessage(ticketId: string, text: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/admin/support/${ticketId}/messages`, { text });
+  }
+
+  updateSupportStatus(ticketId: string, status: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/admin/support/${ticketId}/status`, { status });
+  }
 }

@@ -14,6 +14,7 @@ import { ReviewModeratorComponent } from './features/reviews/review-moderator.co
 import { AnalyticsComponent } from './features/analytics/analytics.component';
 import { SettingsComponent } from './features/settings/settings.component';
 import { SettlementManagerComponent } from './features/settlements/settlement-manager.component';
+import { SupportMonitorComponent } from './features/support/support-monitor.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -34,6 +35,7 @@ export const routes: Routes = [
       { path: 'settlements', component: SettlementManagerComponent },
       { path: 'reviews', component: ReviewModeratorComponent },
       { path: 'analytics', component: AnalyticsComponent },
+      { path: 'support', component: SupportMonitorComponent },
       { path: 'settings', component: SettingsComponent }
     ]
   },
