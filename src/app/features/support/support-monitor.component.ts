@@ -1,7 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { AdminService } from '../../core/services/admin.service';
+import { AdminSocketService } from '../../core/services/admin-socket.service';
 
 @Component({
   selector: 'app-support-monitor',
@@ -216,8 +218,10 @@ import { AdminService } from '../../core/services/admin.service';
     </div>
   `
 })
-export class SupportMonitorComponent implements OnInit {
+export class SupportMonitorComponent implements OnInit, OnDestroy {
   private adminService = inject(AdminService);
+  private adminSocket = inject(AdminSocketService);
+  private subs = new Subscription();
 
   tickets: any[] = [];
   total = 0;
@@ -239,6 +243,59 @@ export class SupportMonitorComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+
+    this.subs.add(
+      this.adminSocket.onSupportTicketCreated.subscribe((data) => {
+        if (this.filterStatus && this.filterStatus !== 'open') return;
+        this.tickets = [
+          {
+            _id: data.ticketId,
+            bookingId: { _id: data.bookingId },
+            raisedBy: {},
+            raisedByRole: data.raisedByRole,
+            issue: data.issue,
+            status: 'open',
+            createdAt: new Date().toISOString(),
+          },
+          ...this.tickets,
+        ];
+        this.total++;
+      })
+    );
+
+    this.subs.add(
+      this.adminSocket.onSupportMessage.subscribe(({ ticketId, message }) => {
+        if (this.activeTicket?._id === ticketId) {
+          const exists = this.activeTicket.messages?.some((m: any) => m._id === message._id);
+          if (!exists) {
+            this.activeTicket.messages = [...(this.activeTicket.messages ?? []), message];
+          }
+          if (this.activeTicket.status === 'open' && message.senderRole !== 'admin') {
+            this.activeTicket.status = 'in_progress';
+            this.syncTicketInList();
+          }
+        }
+      })
+    );
+
+    this.subs.add(
+      this.adminSocket.onSupportStatusChanged.subscribe(({ ticketId, status }) => {
+        if (this.activeTicket?._id === ticketId) {
+          this.activeTicket.status = status;
+        }
+        const idx = this.tickets.findIndex((t) => t._id === ticketId);
+        if (idx !== -1) {
+          this.tickets[idx] = { ...this.tickets[idx], status };
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+    if (this.activeTicket) {
+      this.adminSocket.leaveSupportTicket(this.activeTicket._id);
+    }
   }
 
   load(): void {
@@ -260,6 +317,7 @@ export class SupportMonitorComponent implements OnInit {
     this.activeTicket = { ...ticket };
     this.replyText = '';
     this.loadingMessages = true;
+    this.adminSocket.joinSupportTicket(ticket._id);
 
     this.adminService.getSupportTicket(ticket._id).subscribe({
       next: (res) => {
@@ -271,6 +329,9 @@ export class SupportMonitorComponent implements OnInit {
   }
 
   closeTicket(): void {
+    if (this.activeTicket) {
+      this.adminSocket.leaveSupportTicket(this.activeTicket._id);
+    }
     this.activeTicket = null;
     this.replyText = '';
   }

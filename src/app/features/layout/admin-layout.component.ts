@@ -1,8 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { AdminSocketService } from '../../core/services/admin-socket.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -210,8 +211,9 @@ import { filter } from 'rxjs/operators';
     }
   `]
 })
-export class AdminLayoutComponent implements OnInit {
+export class AdminLayoutComponent implements OnInit, OnDestroy {
   private router = inject(Router);
+  private adminSocket = inject(AdminSocketService);
 
   sidebarOpen = false;
   adminName = '';
@@ -289,10 +291,16 @@ export class AdminLayoutComponent implements OnInit {
       try {
         const user = JSON.parse(userJson);
         this.adminName = user.name || 'Administrator';
+        const adminId = user._id || user.id;
+        if (adminId) this.adminSocket.connect(adminId);
       } catch {
         this.adminName = 'Admin';
       }
     }
+  }
+
+  ngOnDestroy() {
+    this.adminSocket.disconnect();
   }
 
   toggleSidebar() { this.sidebarOpen = !this.sidebarOpen; }
@@ -305,6 +313,7 @@ export class AdminLayoutComponent implements OnInit {
   }
 
   logout() {
+    this.adminSocket.disconnect();
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
     this.router.navigate(['/login']);
