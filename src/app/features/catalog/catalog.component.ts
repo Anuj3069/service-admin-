@@ -236,6 +236,17 @@ import { AdminService } from '../../core/services/admin.service';
               <input type="text" id="svcSkills" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcSkills" placeholder="plumbing, welding" />
             </div>
 
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcDos">Do's (one per line)</label>
+                <textarea id="svcDos" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcDos" rows="4" placeholder="Take care of children with love and attention"></textarea>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcDonts">Don'ts (one per line)</label>
+                <textarea id="svcDonts" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-medium outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcDonts" rows="4" placeholder="Do not leave the child alone"></textarea>
+              </div>
+            </div>
+
             <div class="flex justify-between items-center border-t border-b border-border py-3.5 mt-2" *ngIf="editingService">
               <span class="text-xs font-bold text-textMain">Active Listing Status</span>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -282,6 +293,8 @@ export class CatalogComponent implements OnInit {
   svcRadius = 10;
   svcPerKm = 0;
   svcSkills = '';
+  svcDos = '';
+  svcDonts = '';
   svcActive = true;
 
   ngOnInit() {
@@ -381,6 +394,8 @@ export class CatalogComponent implements OnInit {
       this.svcRadius = svc.searchRadiusKm || 10;
       this.svcPerKm = svc.pricePerKm || 0;
       this.svcSkills = svc.requiredSkills ? svc.requiredSkills.join(', ') : '';
+      this.svcDos = svc.dos ? svc.dos.join('\n') : '';
+      this.svcDonts = svc.donts ? svc.donts.join('\n') : '';
       this.svcActive = svc.isActive;
     } else {
       this.svcName = '';
@@ -391,6 +406,8 @@ export class CatalogComponent implements OnInit {
       this.svcRadius = 10;
       this.svcPerKm = 0;
       this.svcSkills = '';
+      this.svcDos = '';
+      this.svcDonts = '';
       this.svcActive = true;
     }
     this.showServiceModal = true;
@@ -413,6 +430,8 @@ export class CatalogComponent implements OnInit {
       searchRadiusKm: this.svcRadius,
       pricePerKm: this.svcPerKm,
       requiredSkills: this.svcSkills.split(',').map(s => s.trim().toLowerCase()).filter(s => s !== ''),
+      dos: this.svcDos.split('\n').map(s => s.trim()).filter(s => s !== ''),
+      donts: this.svcDonts.split('\n').map(s => s.trim()).filter(s => s !== ''),
       isActive: this.svcActive,
       ...(this.svcMonthPrice !== null && { monthBasePrice: this.svcMonthPrice }),
     };
