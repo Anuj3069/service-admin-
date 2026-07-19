@@ -215,9 +215,9 @@ import { AdminService } from '../../core/services/admin.service';
             </div>
 
             <div class="flex flex-col gap-1.5">
-              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcMonthPrice">Monthly Base Price — 9h (₹)</label>
+              <label class="text-[10px] font-black uppercase tracking-wider text-textMuted" for="svcMonthPrice">Monthly Base Price — per day (₹)</label>
               <input type="number" id="svcMonthPrice" class="w-full px-4 py-2.5 rounded-xl border border-border bg-bgSoft text-textMain text-xs font-semibold outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all" [(ngModel)]="svcMonthPrice" placeholder="Leave empty if monthly booking is disabled" />
-              <span class="text-[10px] text-textMuted">Full-day (16h) will be charged at 2×. Only applies when Monthly Booking is enabled for this service.</span>
+              <span class="text-[10px] text-textMuted">Flat rate charged per working day. Only applies when Monthly Booking is enabled for this service.</span>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
